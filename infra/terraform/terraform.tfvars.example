@@ -1,0 +1,6 @@
+project_id   = "your-gcp-project-id"
+region       = "asia-south1"
+environment  = "prod"
+cluster_name = "admitos-gke-cluster"
+vpc_name     = "admitos-vpc"
+subnet_name  = "admitos-subnet-mumbai"

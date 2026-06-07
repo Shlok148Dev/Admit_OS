@@ -1,0 +1,46 @@
+name: Model Training and Promotion
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  schedule:
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+
+jobs:
+  train-and-promote:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r services/prediction/requirements.txt
+          pip install pytest
+
+      - name: Run Model Training
+        env:
+          DATABASE_URL: "sqlite:///./admitos_prediction.db"
+          MLFLOW_TRACKING_URI: "sqlite:///mlflow.db"
+          MLFLOW_EXPERIMENT_NAME: "cutoff_prediction"
+        run: |
+          python -m services.prediction.training.train_per_exam
+
+      - name: Run Shadow Gating and Promotion
+        env:
+          DATABASE_URL: "sqlite:///./admitos_prediction.db"
+          MLFLOW_TRACKING_URI: "sqlite:///mlflow.db"
+          MLFLOW_EXPERIMENT_NAME: "cutoff_prediction"
+        run: |
+          python -m services.prediction.training.mlflow_lifecycle

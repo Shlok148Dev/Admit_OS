@@ -1,0 +1,36 @@
+{
+  "type": "record",
+  "name": "RawDocument",
+  "namespace": "com.admitos.data",
+  "doc": "Schema for raw crawled admissions documents",
+  "fields": [
+    {
+      "name": "crawler_id",
+      "type": "string",
+      "doc": "Identifier of the crawler agent that fetched the document"
+    },
+    {
+      "name": "source_url",
+      "type": "string",
+      "doc": "The official source URL of the raw document"
+    },
+    {
+      "name": "document_hash",
+      "type": "string",
+      "doc": "SHA-256 hash of the document content to detect duplicates"
+    },
+    {
+      "name": "timestamp",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      },
+      "doc": "Epoch timestamp of when the document was fetched"
+    },
+    {
+      "name": "exam_type",
+      "type": "string",
+      "doc": "Target exam (e.g., JEE_MAIN, NEET, MHT_CET)"
+    }
+  ]
+}

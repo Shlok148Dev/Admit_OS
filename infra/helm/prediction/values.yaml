@@ -1,0 +1,54 @@
+replicaCount: 5
+
+image:
+  repository: asia-south1-docker.pkg.dev/your-project/admitos/prediction-service
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 8000
+  targetPort: 8000
+
+# Aligning with Technical Bible specifications:
+# "Each pod: 4 vCPUs, 8GB RAM, can handle 500 req/min"
+resources:
+  requests:
+    cpu: "2000m"
+    memory: "4Gi"
+  limits:
+    cpu: "4000m"
+    memory: "8Gi"
+
+hpa:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 80
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 75
+
+env:
+  - name: ENV
+    value: "production"
+  - name: PORT
+    value: "8000"
+  - name: DATABASE_URL_SECRET_NAME
+    value: "prediction-db-url"
+  - name: REDIS_URL_SECRET_NAME
+    value: "redis-url"
+  - name: VERTEX_AI_ENDPOINT_SECRET_NAME
+    value: "vertex-ai-endpoint"
+  - name: MLFLOW_TRACKING_URI
+    value: "http://mlflow-service:5000"
+  - name: MODEL_VERSION
+    value: "cutoff_pred_v2.3.1"
+
+serviceAccount:
+  create: true
+  annotations:
+    iam.gke.io/gcp-service-account: "prediction-service-sa@your-project.iam.gserviceaccount.com"
+  name: "prediction-service-sa"
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

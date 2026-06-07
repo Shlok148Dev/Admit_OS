@@ -1,0 +1,76 @@
+JoSAA Counseling Rules and Process — Official Reference Document 2024–2025
+
+This document describes the official JoSAA Joint Seat Allocation Authority counseling process for JEE Main and JEE Advanced qualified candidates seeking admission to IITs, NITs, IIITs, and GFTIs.
+
+FREEZE, FLOAT, AND SLIDE OPTIONS
+
+The Freeze, Float, and Slide mechanism is a key feature of the JoSAA counseling process. Students who receive a seat allotment must choose one of the following three options:
+
+1. FREEZE Option:
+The Freeze option means the candidate is satisfied with the allotted seat and does not wish to be considered for any higher preference. Choosing Freeze retains the current seat permanently. The candidate accepts the allotted college and branch without further changes. Documents must be uploaded to confirm the Freeze option by the deadline.
+
+2. FLOAT Option:
+The Float option means the candidate wants to retain the current allotted seat but also wants to be automatically upgraded to a higher-preference choice (better college or branch) if a seat becomes available in subsequent rounds. If upgraded, the candidate's original seat is released back into the pool. If no better seat opens, the candidate retains the current allotment. The Float option is the recommended choice for candidates who have a seat but want a chance at improvement.
+
+3. SLIDE Option:
+The Slide option is specifically for candidates who want to be upgraded to a better branch in the same college. It is restricted to branch improvement only — candidates cannot slide to a different college. If a better branch in the same institute becomes available, the candidate is automatically upgraded to it.
+
+IMPORTANT DEADLINES
+
+Round 1 seat allotment: Typically announced in the third week of June.
+Document upload deadline: Within 2 days of seat allotment announcement.
+Online fee payment: Simultaneously with document upload.
+Seat acceptance: Mandatory within 2 days to avoid forfeiture.
+
+REPORTING AND DOCUMENT VERIFICATION
+
+All allotted candidates must report to the allotted institute for physical document verification within the specified reporting window. Documents required include:
+- JEE Main/Advanced rank card
+- Class 10 and Class 12 marksheets and passing certificate
+- Category certificate (if applicable) — SC, ST, OBC-NCL, EWS, PwD
+- Date of Birth proof (Aadhaar or Passport)
+- Passport-size photographs
+- Medical fitness certificate
+
+SEAT MATRIX AND CATEGORIES
+
+JoSAA allocates seats under two quota types:
+- Home State (HS) quota: Reserved for candidates from the state where the NIT/IIIT/GFTI is located
+- Other State (OS) quota: Open to candidates from all other states
+
+Category breakdowns:
+- OPEN (General): No reservation criteria
+- OBC-NCL (Other Backward Classes - Non-Creamy Layer): 27% reservation
+- SC (Scheduled Caste): 15% reservation
+- ST (Scheduled Tribe): 7.5% reservation
+- EWS (Economically Weaker Sections): 10% reservation
+- PwD (Persons with Disability): 5% horizontal reservation
+
+ROUND STRUCTURE
+
+JoSAA 2025 is expected to conduct 6 rounds of seat allocation:
+- Rounds 1–4: For all participating institutes (IITs, NITs, IIITs, GFTIs)
+- Rounds 5–6: For NITs, IIITs, and GFTIs only (IITs do not participate in Rounds 5–6)
+
+Candidates who do not accept a seat in Round 1 can still participate in subsequent rounds using their rank. Candidates who withdraw after Round 1 lose their chance and cannot re-enter.
+
+JOSAA CUTOFF TRENDS 2024
+
+NIT Tiruchirappalli Computer Science Engineering:
+- OPEN OS 2024 Round 6 Closing Rank: approximately 2,200
+- OBC-NCL OS 2024 Round 6 Closing Rank: approximately 4,800
+- SC OS 2024 Round 6 Closing Rank: approximately 12,000
+
+NIT Warangal Computer Science Engineering:
+- OPEN OS 2024 Round 6 Closing Rank: approximately 3,100
+- OBC-NCL OS 2024 Round 6 Closing Rank: approximately 6,500
+
+IIT Bombay Computer Science Engineering:
+- OPEN 2024 Round 6 Closing Rank: approximately 63
+- OBC-NCL 2024 Round 6 Closing Rank: approximately 220
+
+WITHDRAWAL POLICY
+
+A candidate who has been allotted a seat can withdraw at any time before the reporting deadline. The seat acceptance security deposit is refunded (minus processing charges) if withdrawal is done before reporting. Candidates who report and then withdraw must apply for refund as per institute policy.
+
+This document is for reference only. Always verify the latest schedule and rules at https://josaa.nic.in before making any decisions.

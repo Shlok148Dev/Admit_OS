@@ -1,0 +1,53 @@
+replicaCount: 5
+
+image:
+  repository: asia-south1-docker.pkg.dev/your-project/admitos/auth-service
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 8000
+  targetPort: 8000
+
+resources:
+  requests:
+    cpu: "500m"
+    memory: "512Mi"
+  limits:
+    cpu: "1000m"
+    memory: "1024Mi"
+
+hpa:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 75
+  targetMemoryUtilizationPercentage: 75
+
+env:
+  - name: ENV
+    value: "production"
+  - name: PORT
+    value: "8000"
+  - name: DATABASE_URL_SECRET_NAME
+    value: "auth-db-url"
+  - name: REDIS_URL_SECRET_NAME
+    value: "redis-url"
+  - name: JWT_SECRET_NAME
+    value: "jwt-secret"
+  - name: GOOGLE_CLIENT_ID_SECRET_NAME
+    value: "google-client-id"
+  - name: GOOGLE_CLIENT_SECRET_NAME
+    value: "google-client-secret"
+
+# Service Account for Workload Identity
+serviceAccount:
+  create: true
+  annotations:
+    iam.gke.io/gcp-service-account: "auth-service-sa@your-project.iam.gserviceaccount.com"
+  name: "auth-service-sa"
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

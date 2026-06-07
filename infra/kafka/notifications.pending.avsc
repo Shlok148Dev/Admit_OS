@@ -1,0 +1,49 @@
+{
+  "type": "record",
+  "name": "PendingNotification",
+  "namespace": "com.admitos.notifications",
+  "doc": "Schema for queued and pending user notifications",
+  "fields": [
+    {
+      "name": "user_id",
+      "type": "string",
+      "doc": "Hashed or UUID reference of the user"
+    },
+    {
+      "name": "channel",
+      "type": {
+        "type": "enum",
+        "name": "NotificationChannel",
+        "symbols": ["PUSH", "EMAIL", "SMS", "WHATSAPP"]
+      },
+      "doc": "Notification dispatch channel"
+    },
+    {
+      "name": "template_id",
+      "type": "string",
+      "doc": "Template reference in notification service"
+    },
+    {
+      "name": "variables",
+      "type": "string",
+      "doc": "JSON string containing template parameter key-values"
+    },
+    {
+      "name": "priority",
+      "type": {
+        "type": "enum",
+        "name": "NotificationPriority",
+        "symbols": ["HIGH", "MEDIUM", "LOW"]
+      },
+      "doc": "Notification priority level (e.g., HIGH is JoSAA round result, LOW is feature announcement)"
+    },
+    {
+      "name": "scheduled_at",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      },
+      "doc": "Epoch timestamp of when the notification should be dispatched"
+    }
+  ]
+}

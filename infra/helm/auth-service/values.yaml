@@ -1,0 +1,29 @@
+replicaCount: 2
+
+image:
+  repository: gcr.io/admit-os/auth-service
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 8000
+
+env:
+  ENVIRONMENT: production
+  ACCESS_TOKEN_EXPIRE_MINUTES: 15
+  REFRESH_TOKEN_EXPIRE_DAYS: 7
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1024Mi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 75

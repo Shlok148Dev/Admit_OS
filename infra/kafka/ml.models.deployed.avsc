@@ -1,0 +1,36 @@
+{
+  "type": "record",
+  "name": "ModelDeployed",
+  "namespace": "com.admitos.ml",
+  "doc": "Schema for ML model deployment events",
+  "fields": [
+    {
+      "name": "model_name",
+      "type": "string",
+      "doc": "Name of the ML model (e.g., college_cutoff_ensemble)"
+    },
+    {
+      "name": "version",
+      "type": "string",
+      "doc": "Semantic model version (e.g., v2.3.1)"
+    },
+    {
+      "name": "metrics",
+      "type": "string",
+      "doc": "JSON string containing model metrics (e.g., MAE, MAPE, calibration metrics)"
+    },
+    {
+      "name": "deployment_timestamp",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      },
+      "doc": "Epoch timestamp of when the model was promoted to production"
+    },
+    {
+      "name": "endpoint_url",
+      "type": "string",
+      "doc": "Vertex AI or Triton serving endpoint URL"
+    }
+  ]
+}

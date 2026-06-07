@@ -1,0 +1,122 @@
+# JoSAA Business Rules 2024
+Official Rules and Regulations for Admission to IITs, NITs, IIITs, and Other-GFTIs for the Academic Year 2024-2025.
+
+## Section 1: Introduction and General Overview
+The Joint Seat Allocation Authority (JoSAA) 2024 has been set up by the Ministry of Education, Government of India, to manage and regulate the joint seat allocation for admissions to 121 premier academic institutions. These include 23 Indian Institutes of Technology (IITs), 31 National Institutes of Technology (NITs), 26 Indian Institutes of Information Technology (IIITs), and 41 Other-Government Funded Technical Institutes (Other-GFTIs). 
+
+Admissions to all these institutions are processed through a single, centralized online portal. This single platform ensures transparency, efficiency, and fairness, preventing multiple seat holding by a single candidate. The rules outlined in this document govern the joint seat allocation process. Candidates who have qualified in JEE Main 2024 and/or JEE Advanced 2024 are eligible to participate in JoSAA 2024.
+
+All academic programs at the participating institutes are open to eligible candidates who meet the specific eligibility criteria, including performance in qualifying examinations, category-specific requirements, and age limits where applicable. Physical fitness verification is mandatory for all programs, with special physical requirements enforced for courses in mining engineering, petroleum engineering, and maritime studies.
+
+## Section 2: Registration and Profile Verification
+Every eligible candidate must log in and register on the official JoSAA 2024 online portal. Registration is a one-time process and is free of charge. Logging in requires the candidate's JEE Main 2024 Application Number and Password. Candidates qualifying only for JEE Advanced must also use their JEE Main credentials.
+
+Upon logging in, the system retrieves personal details from the JEE databases. Candidates must verify their details, including gender, state code of eligibility, nationality, contact details, and category (General, OBC-NCL, SC, ST, EWS). If there is any discrepancy in the retrieved database profile, the candidate must contact the JEE helpdesk before completing registration.
+
+Once registered, candidates must update their contact details, including a valid email address and Indian mobile phone number. These details will be used for all future communications, including allotment alerts, verification warnings, and OTP verification. No changes to the profile details (gender, state code of eligibility, category, etc.) will be allowed once the registration is locked.
+
+## Section 3: Choice Filling and Locking
+Registered candidates can fill in their choices of academic programs (college and branch combinations) in decreasing order of preference. The list of available programs is generated dynamically based on the candidate's qualification status (JEE Main and/or JEE Advanced).
+
+Candidates are advised to fill in as many choices as possible to maximize their chances of securing a seat. There is no upper limit on the number of choices a candidate can submit. The choices filled must be in the absolute preferred order of the student. 
+
+JoSAA 2024 provides a choice locking window during the final days of the choice filling period. If a candidate does not lock their choices, the system will automatically lock the last saved choices when the choice filling window closes. Candidates must save their choices frequently during the choice-filling phase. Locked choices cannot be modified under any circumstances.
+
+## Section 4: Seat Allotment and Online Reporting
+Seat allotment is done in multiple rounds based on the candidate's JEE ranks, choices filled, and seat availability in each category. After a seat is allotted, the candidate must complete the online reporting process immediately within the scheduled timeline. Online reporting involves three mandatory steps:
+1. Selecting a seat acceptance option (Freeze, Slide, or Float).
+2. Uploading the required documents in PDF format.
+3. Paying the Seat Acceptance Fee (SAF) online.
+
+Failure to complete any of these three steps within the specified deadline will result in the automatic cancellation of the allotted seat, and the candidate will be permanently rejected from all subsequent rounds of JoSAA 2024.
+
+### The Freeze Option
+Selecting the Freeze option means the candidate accepts the allotted seat and is fully satisfied. They do not wish to participate in subsequent rounds of seat allocation. The allotted seat is locked as final, and the candidate will proceed directly to the physical reporting stage at the allotted institute.
+
+### The Slide Option
+Selecting the Slide option means the candidate accepts the allotted seat but allows upgradation to a better branch ONLY within the SAME institute in subsequent rounds. If no upgrade is received, the candidate retains the currently allotted seat.
+
+### The Float Option
+Selecting the Float option means the candidate accepts the allotted seat but allows upgradation to a better branch/institute in any subsequent rounds. If an upgrade is received in a later round, the previous seat is automatically cancelled and released to other candidates. If no upgrade is received, the candidate retains the currently allotted seat.
+
+## Section 5: Document Verification and Verification Centers
+During online reporting, virtual reporting officers verify the uploaded documents. These documents include:
+- Class 10 Certificate (as proof of date of birth).
+- Class 12 Marksheet and Certificate (as proof of qualifying exam).
+- Category Certificate (OBC-NCL, SC, ST, EWS) where applicable, issued on or after April 1, 2024, in the prescribed JoSAA format.
+- State Code of Eligibility proof (usually Class 12 marksheet showing exam center state).
+- Medical Certificate in the official JoSAA format, signed by a registered medical practitioner.
+- PwD Certificate (if applicable), along with physical verification at designated centers.
+
+If the verification officer raises a query, the candidate must respond online before the query response deadline. Failure to respond to queries will lead to seat cancellation. If the documents are found invalid, the allotted seat will be cancelled, and the candidate's eligibility category may be downgraded (e.g., from OBC-NCL to General) for subsequent rounds, if applicable.
+
+## Section 6: Seat Acceptance Fee (SAF) and Partial Admission Fee (PAF)
+The Seat Acceptance Fee (SAF) must be paid online via Net Banking, UPI, or Credit/Debit Card. The SAF rates for JoSAA 2024 are:
+- SC, ST, PwD Candidates: INR 17,500
+- General, OBC-NCL, EWS Candidates: INR 35,000
+
+The Seat Acceptance Fee includes a non-refundable administrative charge of INR 2,000. 
+
+Additionally, to secure the seat after the final round of JoSAA (Round 5/6), candidates must pay a Partial Admission Fee (PAF) within the specified dates. The PAF rates are:
+- SC, ST, PwD Candidates: INR 20,000
+- General, OBC-NCL, EWS Candidates: INR 45,000
+
+Failure to pay the Partial Admission Fee within the deadline is treated as rejection of the allotted seat, and the seat is cancelled.
+
+## Section 7: Dual Allotment Rule and System Logic
+A candidate can hold only one seat across the entire system at any given point. If a candidate is allotted a seat in a round, and in a subsequent round the system upgrades the candidate to a higher-preference choice, the previously allotted seat is automatically cancelled. The released seat is instantly available for allotment to other candidates in the same round. 
+
+This is the Dual Allotment Rule. There is no option to return to the previously allotted seat once an upgrade has occurred. Candidates must structure their choice list carefully, ensuring that any higher-indexed choice is genuinely more preferred than a lower-indexed choice.
+
+## Section 8: Category Upgradation and Seat Conversion
+Category candidates (OBC-NCL, SC, ST, EWS) are first evaluated against the Open Merit (General) seat pool. If a category candidate qualifies under the general cutoff, they are allocated a General seat. This process is called category upgradation. 
+
+In the final rounds, if seats reserved for specific categories remain vacant due to a lack of eligible candidates, the system applies seat conversion rules:
+- Vacant ST seats are converted to SC seats.
+- Vacant SC seats are converted to General seats.
+- Vacant OBC-NCL and EWS seats are converted to General seats.
+
+These conversions occur only after exhaustive evaluation of all registered candidates in the respective category list.
+
+## Section 9: Withdrawal and Seat Cancellation
+Candidates who have accepted a seat can withdraw from the counseling process. Withdrawal is permitted up to the penultimate round of JoSAA (Round 5). No candidate is allowed to withdraw in the final round.
+
+To withdraw, the candidate must initiate a withdrawal request on the JoSAA portal, upload a withdrawal consent form, and confirm with an OTP. Upon withdrawal, the seat is cancelled, and the Seat Acceptance Fee is refunded after deducting the administrative charge of INR 2,000. 
+
+A seat may also be cancelled by the authority if the candidate fails to meet the medical standards, fails document verification, or does not report physically to the allotted institute for final admission.
+
+## Section 10: CSAB Special Rounds
+After the completion of all JoSAA rounds, the Central Seat Allocation Board (CSAB) conducts Special Rounds for filling vacant seats in NITs, IIITs, and Other-GFTIs. The CSAB Special Rounds do not cover IIT seats, which are strictly locked after the final JoSAA round.
+
+Eligible candidates for CSAB Special Rounds include:
+- Candidates who did not register for JoSAA.
+- Candidates who participated in JoSAA but did not get any seat.
+- Candidates who were allotted a seat but withdrew or had their seat cancelled.
+- Candidates who accepted a seat in JoSAA and wish to upgrade.
+
+Participating in CSAB requires a fresh registration and payment of a special round fee. The choices filled in JoSAA are not carried over; candidates must fill fresh choices. If a candidate is allotted a seat in CSAB, their previously retained JoSAA seat is automatically cancelled. If no seat is allotted in CSAB, they retain their JoSAA allotted seat, provided they paid the PAF.
+
+## Section 11: Summary of Deadlines and Compliance
+All dates, deadlines, and schedules published by JoSAA 2024 are final and non-negotiable. Candidates are solely responsible for checking the portal daily for alerts, seat allotment letters, and queries. Lack of internet access, electricity issues, or bank transaction delays will not be accepted as valid excuses for missing deadlines. 
+
+Physical reporting at the final allotted institute is mandatory after paying the Partial Admission Fee. Candidates must carry all original documents, copies of allotment letters, fee receipts, and medical certificates for physical verification at the institute to complete the admission process.
+
+## Section 12: Detailed Allocation Algorithms & Rank Tiebreaker Rules
+When two or more candidates have the same rank (tie) and have filled the same preferences, the seat allocation algorithm applies special tiebreaker rules defined for JEE Main and JEE Advanced:
+1. Mathematics Score: Higher marks in the Mathematics section of the exam takes precedence.
+2. Physics Score: If a tie remains, the candidate with higher marks in the Physics section takes precedence.
+3. Ratio of Positive to Negative Marks: If a tie still remains, the candidate with the higher ratio of positive marks to negative marks is ranked higher.
+4. Age Criterion: If the tie is still unresolved, the older candidate is given priority.
+5. In rare cases where a tie cannot be broken even after applying all criteria, supernumerary seats are created to accommodate all tied candidates in that specific round.
+
+The allocation algorithm runs deterministically, processing choices candidate by candidate in strict order of their rank. For each candidate, the algorithm checks the list of choices sequentially from choice number 1 downwards. The first choice that has an open seat in the candidate's eligible quota and category is allocated, and the algorithm immediately moves to the next candidate in the rank list.
+
+## Section 13: Frequently Encountered Allocation Scenarios and Solutions
+### Scenario A: A candidate is allotted their 10th choice in Round 1 and chooses the Float option.
+In Round 2, they may be upgraded to their 5th choice. In this case, their 10th choice is immediately and permanently cancelled and made available to other candidates. The candidate cannot claim the 10th choice seat under any circumstances in subsequent rounds. If no upgrade occurs, they will retain the 10th choice seat.
+
+### Scenario B: A candidate fails to upload the correct Category Certificate during Round 1.
+If the Category Certificate is found to be invalid, the virtual reporting officer rejects the category claim. The candidate is then converted to a GENERAL category candidate for all subsequent rounds. If the candidate's JEE rank is within the General cutoff for the allotted seat, they retain the seat under the General category. Otherwise, the allotted seat is cancelled, and they are considered as a General candidate for seat allotment in subsequent rounds.
+
+### Scenario C: A candidate does not pay the Partial Admission Fee (PAF) after Round 5.
+Even if the candidate has paid the Seat Acceptance Fee and completed document verification, failure to pay the PAF within the deadline indicates that the candidate is not interested in admissions. The allotted seat is cancelled, and the candidate cannot participate in the regular JoSAA reporting anymore. They must register as a fresh candidate in CSAB Special Rounds if they wish to seek admission to NITs/IIITs/GFTIs.

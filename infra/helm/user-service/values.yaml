@@ -1,0 +1,28 @@
+replicaCount: 2
+
+image:
+  repository: gcr.io/admit-os/user-service
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 8001
+
+env:
+  ENVIRONMENT: production
+  REDIS_URL: "redis://redis-master.default.svc.cluster.local:6379/0"
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1024Mi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 75

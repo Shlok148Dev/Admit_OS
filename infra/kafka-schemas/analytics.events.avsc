@@ -1,0 +1,36 @@
+{
+  "type": "record",
+  "name": "AnalyticsEvent",
+  "namespace": "com.admitos.analytics",
+  "doc": "Schema for DPDP compliant user interaction logs",
+  "fields": [
+    {
+      "name": "user_id",
+      "type": "string",
+      "doc": "SHA-256 hashed user ID to ensure DPDP Act 2023 compliance"
+    },
+    {
+      "name": "event_type",
+      "type": "string",
+      "doc": "Type of event (e.g., PREDICTION_REQUESTED, PATH_COMPARED, SEARCH_COLLEGE)"
+    },
+    {
+      "name": "properties",
+      "type": "string",
+      "doc": "JSON string detailing user preferences or search filters used during the event"
+    },
+    {
+      "name": "timestamp",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      },
+      "doc": "Epoch timestamp of when the event occurred"
+    },
+    {
+      "name": "session_id",
+      "type": "string",
+      "doc": "Unique session ID generated per active user session"
+    }
+  ]
+}

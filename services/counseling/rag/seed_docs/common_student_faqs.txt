@@ -1,0 +1,149 @@
+Q: What is the Seat Acceptance Fee (SAF) in JoSAA?
+A: The SAF is INR 35,000 for General/OBC/EWS candidates, and INR 17,500 for SC/ST/PwD candidates.
+
+Q: What is the Partial Admission Fee (PAF) in JoSAA?
+A: The PAF is INR 45,000 for General/OBC/EWS, and INR 20,000 for SC/ST/PwD candidates, paid after the final round of seat allotment to confirm admission.
+
+Q: Can I change my category during counseling?
+A: No, you cannot change your category to a reserved category if you registered as General. However, if your reserved category certificate is rejected, you will be downgraded to the General category.
+
+Q: What does the Freeze option mean?
+A: The Freeze option locks the currently allotted seat as final, opting out of all subsequent rounds of allotment.
+
+Q: What does the Slide option mean?
+A: The Slide option accepts the allotted seat but allows upgradation to a preferred branch within the same institute in later rounds.
+
+Q: What does the Float option mean?
+A: The Float option accepts the allotted seat but allows upgradation to a preferred branch in any institute in subsequent rounds.
+
+Q: Is physical verification required for PwD candidates?
+A: Yes, PwD candidates must report to designated centers for physical verification of their disability certificate during counseling.
+
+Q: Can I withdraw a seat in JoSAA Round 5?
+A: Yes, withdrawal is allowed until the penultimate round (Round 5). No withdrawals are allowed in the final round.
+
+Q: What is the refund process for seat withdrawal?
+A: If a candidate withdraws, the SAF is refunded after deducting a processing fee of INR 2,000.
+
+Q: What is CSAB?
+A: The Central Seat Allocation Board (CSAB) conducts special rounds for vacant seats in NITs, IIITs, and GFTIs after JoSAA rounds are completed.
+
+Q: Are IIT seats available in CSAB Special Rounds?
+A: No, vacant seats in IITs are not filled through CSAB. IIT seats are strictly locked after JoSAA.
+
+Q: Who is eligible for CSAB special rounds?
+A: Anyone who qualified in JEE Main is eligible, including those who registered or did not register in JoSAA, or those whose seats were cancelled.
+
+Q: Do I need to register fresh for CSAB?
+A: Yes, all candidates participating in CSAB must register fresh and pay the CSAB registration fee.
+
+Q: If I get a seat in CSAB, what happens to my JoSAA seat?
+A: If you are allotted a new seat in CSAB, your previously retained JoSAA seat is automatically cancelled.
+
+Q: What happens if I don't get a seat in CSAB?
+A: If no seat is allotted in CSAB, you retain your previously secured JoSAA seat (if you paid the Partial Admission Fee).
+
+Q: What is the NEET MCC Free Exit option?
+A: It allows candidates allotted a seat in Round 1 of MCC to not report/join the college without forfeiting their security deposit.
+
+Q: Is there a Free Exit in NEET MCC Round 2?
+A: No, if you are allotted a seat in Round 2 and do not join, your security deposit will be forfeited.
+
+Q: What is the security deposit for NEET MCC Deemed Universities?
+A: The refundable security deposit for Deemed Universities is INR 2,00,000, along with a non-refundable fee of INR 5,000.
+
+Q: What is the security deposit for NEET All India Quota?
+A: It is INR 10,000 for UR/EWS and INR 5,000 for SC/ST/OBC/PwD candidates.
+
+Q: Can I participate in both All India Quota (MCC) and State counseling?
+A: Yes, until you join an allotted seat in Round 2 of All India Quota, after which you cannot participate in state counseling.
+
+Q: What is the Stray Vacancy Round in NEET counseling?
+A: It is the final round conducted online by MCC to fill remaining vacant seats in AIQ and Deemed Universities.
+
+Q: Is fresh registration allowed in NEET Stray Vacancy Round?
+A: No, fresh registrations are generally not allowed. Only previously registered candidates who have not been allotted any seat can participate.
+
+Q: What is the penalty for not joining a seat allotted in Stray Vacancy Round?
+A: Your security deposit will be forfeited, and you will be debarred from the NEET exam for the next academic year.
+
+Q: What documents are required for NEET counseling reporting?
+A: NEET Admit Card, Rank Card, Class 10/12 certificates, Category certificate, identity proof, Medical certificate, and passport photographs.
+
+Q: Can I change my choices after locking them?
+A: No, locked choices cannot be modified. They are final for that allotment phase.
+
+Q: What happens if I forget to lock my choices?
+A: The system will automatically lock your last saved choices when the choice filling window closes.
+
+Q: What is the State Code of Eligibility in JEE?
+A: It is the state from which you passed your Class 12 or equivalent qualifying examination, not your birth or residential state.
+
+Q: Can an OBC-NCL candidate get a general seat?
+A: Yes, if the candidate's rank is within the open merit cutoff, they can be allotted a seat from the general pool.
+
+Q: What is the Dual Allotment Rule?
+A: A candidate is allotted only one seat at a time. The previous seat is automatically cancelled if a new higher-preference seat is allotted.
+
+Q: Can I change my float option to freeze later?
+A: Yes, you can change your option from Float/Slide to Freeze during the online reporting window of any round.
+
+Q: Can I change my freeze option to float later?
+A: No, once you select Freeze, it is final, and you cannot opt for Float or Slide in subsequent rounds.
+
+Q: What is the Seat Acceptance Fee for SC candidates in JoSAA?
+A: For SC candidates, the Seat Acceptance Fee is INR 17,500.
+
+Q: Is a medical certificate mandatory for JoSAA?
+A: Yes, a medical certificate signed by a registered medical practitioner in the official JoSAA format is compulsory.
+
+Q: How is the state code of eligibility determined for candidates who passed Class 12 from NIOS?
+A: It is determined by the location of the study center allotted to the candidate by NIOS.
+
+Q: What is the administrative charge deducted during JoSAA withdrawal?
+A: An administrative charge of INR 2,000 is deducted from the Seat Acceptance Fee refund.
+
+Q: What happens if my documents are rejected during online reporting?
+A: The virtual reporting officer cancels the allotted seat. If the rejection was due to a category error, you may be considered as General in later rounds.
+
+Q: Can I submit a digital copy of documents during reporting?
+A: Yes, you must upload PDF copies online, but you must carry the original documents for physical verification at the allotted college.
+
+Q: What is the category conversion rule for ST seats?
+A: If ST seats remain vacant after all attempts, they are converted to SC seats before the final allotment rounds.
+
+Q: What is the category conversion rule for SC/OBC/EWS seats?
+A: Vacant SC, OBC, and EWS seats are converted to General seats if no eligible category candidates are available in the final round.
+
+Q: Is there a round-wise choice filling in JoSAA?
+A: No, choice filling is done only once before Round 1. These choices are locked and used for all 5 rounds of JoSAA.
+
+Q: Do I have to pay SAF again if my seat is upgraded?
+A: No, SAF is paid only once when you are first allotted a seat in counseling.
+
+Q: What happens if I miss the online query response deadline?
+A: Your seat allotment is automatically cancelled, and you are removed from the counseling process.
+
+Q: Can I get my security deposit refunded if I withdraw before MCC Round 2 starts?
+A: Yes, if you withdraw or exit from a Round 1 allotted seat, it falls under the Free Exit policy, and the deposit is safe.
+
+Q: How many passport-size photos are needed for NEET college reporting?
+A: You must bring at least 8 passport-size photographs, preferably matching the one uploaded on the application form.
+
+Q: What is the minimum qualifying percentile for NEET All India Quota counseling?
+A: Typically 50th percentile for General category and 40th percentile for SC/ST/OBC category.
+
+Q: What is a supernumerary seat in JoSAA?
+A: These are additional seats created specifically for female candidates to improve gender balance, or for OCI/PIO/Foreign nationals, and tiebreaker cases.
+
+Q: Can I register for CSAB if I did not qualify in JEE Main?
+A: No, you must have qualified in JEE Main to register for CSAB Special Rounds.
+
+Q: What is the online relieving letter in NEET counseling?
+A: It is an official letter generated online by the allotted college when a candidate upgrades or resigns, allowing them to join another college.
+
+Q: Can I participate in JoSAA if I have a compartment in Class 12?
+A: You are only eligible if you clear the compartment and meet the board marks criteria before the final reporting deadline.
+
+Q: How is the state code of eligibility determined for Indian citizens passing Class 12 from Nepal/Bhutan?
+A: The state code of eligibility is determined based on the permanent residential address of the candidate in India.

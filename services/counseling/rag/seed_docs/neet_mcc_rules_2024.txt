@@ -1,0 +1,59 @@
+# NEET-UG MCC Counseling Rules 2024
+Official Guidelines and Information Bulletin for Online Undergraduate Seat Allotment for MBBS, BDS, and BSc Nursing Programs.
+
+## Section 1: Introduction and Institutional Quotas
+The Medical Counseling Committee (MCC) under the Directorate General of Health Services (DGHS), Government of India, conducts the online counseling for allocation of 15% All India Quota (AIQ) seats, 100% seats of Deemed Universities, Central Universities (including Delhi University, AMU, BHU), ESIC Medical Colleges, Armed Forces Medical College (AFMC) (for registration only), and Central Institutes (VMMC, Safdarjung Hospital, ABVIMS, RML Hospital). 
+
+The admissions process is designed to allocate seats in MBBS, BDS, and BSc Nursing courses based on merit obtained in the National Eligibility cum Entrance Test (NEET-UG) 2024. Participating candidates must meet the age and academic qualification criteria specified in the NEET Information Bulletin.
+
+The remaining 85% of MBBS and BDS seats are allocated by the respective State Counseling Authorities through their independent state counseling processes. Candidates can participate in both All India Quota (MCC) and State Quota counseling simultaneously, subject to the rules of seat holding and exit policies.
+
+## Section 2: Registration, Fees, and Security Deposits
+Participating candidates must register online on the MCC portal. Registration requires entering the NEET-UG Application Number, Roll Number, Candidate Name, Mother's Name, Date of Birth, and Mobile/Email. 
+
+Registration involves paying a non-refundable registration fee and a refundable security deposit. The fee structures are:
+- For 15% All India Quota, Central Universities, and ESIC:
+  - Non-refundable fee: INR 1,000 for UR/EWS candidates; INR 500 for SC/ST/OBC/PwD candidates.
+  - Refundable security deposit: INR 10,000 for UR/EWS candidates; INR 5,000 for SC/ST/OBC/PwD candidates.
+- For Deemed Universities:
+  - Non-refundable fee: INR 5,000 for all candidates.
+  - Refundable security deposit: INR 2,00,000 for all candidates.
+
+The security deposit is refunded to the candidate's registered bank account if they are not allotted any seat, or if they join the allotted seat. The deposit is forfeited if a candidate is allotted a seat in Round 2 or subsequent rounds and fails to join the allotted college, or if they withdraw after allotment.
+
+## Section 3: Choice Filling, Saving, and Automatic Locking
+Candidates can select and fill their preferred choices of medical colleges and courses on the MCC online portal. The portal allows sorting colleges by state, program, or type of university. Candidates can add, delete, and re-order choices.
+
+Candidates are strongly advised to save their choices frequently during the choice-filling period. On the last day of the choice-filling window, a specific time slot is provided for choice locking. If a candidate fails to lock their choices, the system will automatically lock the choices saved in the portal at the closing deadline. Modified or unlocked choices will not be evaluated for seat allotment.
+
+## Section 4: Round 1 Seat Allotment and Free Exit Policy
+Round 1 is the first phase of online seat allotment. If a candidate is allotted a seat in Round 1, they have two options:
+1. Report to the allotted college, complete document verification, pay the tuition fee, and secure the seat. They can also submit an option for upgradation in Round 2.
+2. Opt for a Free Exit. Under the Free Exit Policy, a candidate allotted a seat in Round 1 who does not report or join the allotted college does not lose their security deposit. They are eligible to participate in Round 2 without any penalty or fresh registration.
+
+This Free Exit option is exclusive to Round 1 of the MCC counseling. Once a candidate joins the Round 1 seat and does not opt for upgradation, or if they do not join a Round 2 allotted seat, different forfeiture and exit rules apply.
+
+## Section 5: Round 2 and Upgradation Rules
+Round 2 requires fresh choice filling for all registered candidates. Candidates who joined the Round 1 seat and opted for upgradation will be considered. If a candidate is upgraded in Round 2, the Round 1 seat is automatically cancelled, and they must collect their documents and online relieving letter from the Round 1 college to join the Round 2 allotted college.
+
+There is no "Free Exit" in Round 2. If a candidate is allotted a seat in Round 2 and fails to join the college, their refundable security deposit is forfeited. They are blocked from further regular rounds of AIQ counseling, although they can register fresh for the Stray Vacancy Round by paying the fees and security deposit again.
+
+If a candidate joins the allotted Round 2 seat, they cannot resign or vacate the seat. They are also barred from participating in any State Quota counseling. The MCC shares the list of joined candidates with all states to prevent dual seat holding.
+
+## Section 6: Round 3 and Stray Vacancy Round Rules
+From 2024 onwards, MCC conducts four rounds of online counseling: Round 1, Round 2, Round 3 (previously Mop-Up Round), and the Online Stray Vacancy Round. 
+- Round 3: Candidates who did not get a seat in Round 1 or 2, or those who registered fresh, can fill choices. If a seat is allotted in Round 3, the candidate must join. Failure to join will result in forfeiture of the security deposit and elimination from subsequent rounds.
+- Online Stray Vacancy Round: This round is conducted online by MCC for remaining vacant seats in AIQ and Deemed Universities. Only candidates who have not been allotted any seat in previous rounds (Round 1, 2, or 3) are eligible. No fresh registration is allowed. The security deposit is forfeited if a candidate is allotted a seat and does not join. Furthermore, such candidates are debarred from the NEET exam for the next academic year.
+
+## Section 7: Mandatory Documents for Reporting
+Allotted candidates must report physically to the medical college with original documents and self-attested photocopies:
+1. NEET-UG 2024 Admit Card and Result/Rank Letter.
+2. Class 10 Certificate and Marksheet (for date of birth).
+3. Class 12 Certificate and Marksheet.
+4. Eight passport size photographs (same as affixed on the application form).
+5. Provisional Allotment Letter generated online.
+6. Proof of Identity (Aadhar Card, PAN Card, Driving License, or Passport).
+7. Category Certificate (SC/ST/OBC/EWS) if applicable, matching the MCC guidelines and issued by competent authority.
+8. PwD Certificate (if applicable), issued by the authorized medical boards.
+
+Failure to produce any of the original documents at the time of reporting will result in the immediate cancellation of the seat allotment.

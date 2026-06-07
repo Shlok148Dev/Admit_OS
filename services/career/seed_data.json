@@ -1,0 +1,522 @@
+{
+  "scholarships": [
+    {
+      "name": "NSP Central Sector Scheme of Scholarship",
+      "provider": "Department of Higher Education",
+      "description": "Scholarship for college and university students based on Class 12 merit.",
+      "amount": "₹12,000 to ₹20,000 per annum",
+      "eligibility_criteria": "Top 20th percentile in Class 12, family income < ₹4.5 LPA, regular student.",
+      "eligible_categories": ["GENERAL", "OBC", "SC", "ST", "EWS"],
+      "eligible_states": null,
+      "eligible_genders": null,
+      "max_family_income": 450000.0,
+      "min_academic_score": 80.0,
+      "source_url": "https://scholarships.gov.in",
+      "data_confidence": "HIGH"
+    },
+    {
+      "name": "NSP Post Matric Scholarship Scheme for SC Students",
+      "provider": "Ministry of Social Justice & Empowerment",
+      "description": "Scholarships for Scheduled Caste students studying at post-matriculation level.",
+      "amount": "Full tuition waiver and maintenance allowance",
+      "eligibility_criteria": "Belong to SC category, family income < ₹2.5 LPA.",
+      "eligible_categories": ["SC"],
+      "eligible_states": null,
+      "eligible_genders": null,
+      "max_family_income": 250000.0,
+      "min_academic_score": 50.0,
+      "source_url": "https://scholarships.gov.in",
+      "data_confidence": "HIGH"
+    },
+    {
+      "name": "NSP Post Matric Scholarship Scheme for ST Students",
+      "provider": "Ministry of Tribal Affairs",
+      "description": "Scholarships for Scheduled Tribe students studying at post-matriculation level.",
+      "amount": "Full tuition waiver and maintenance allowance",
+      "eligibility_criteria": "Belong to ST category, family income < ₹2.5 LPA.",
+      "eligible_categories": ["ST"],
+      "eligible_states": null,
+      "eligible_genders": null,
+      "max_family_income": 250000.0,
+      "min_academic_score": 50.0,
+      "source_url": "https://scholarships.gov.in",
+      "data_confidence": "HIGH"
+    },
+    {
+      "name": "NSP Merit Cum Means Scholarship for Minorities",
+      "provider": "Ministry of Minority Affairs",
+      "description": "Scholarships for minority community students pursuing professional courses.",
+      "amount": "₹20,000 per annum",
+      "eligibility_criteria": "Belong to Minority (Muslim/Christian/Sikh/Buddhist/Jain/Parsi), score >= 50% in Class 12, family income < ₹2.5 LPA.",
+      "eligible_categories": ["GENERAL", "OBC", "SC", "ST", "EWS"],
+      "eligible_states": null,
+      "eligible_genders": null,
+      "max_family_income": 250000.0,
+      "min_academic_score": 50.0,
+      "source_url": "https://scholarships.gov.in",
+      "data_confidence": "HIGH"
+    },
+    {
+      "name": "Saksham Scholarship Scheme for Specially Abled Students",
+      "provider": "AICTE",
+      "description": "Scholarship supporting specially-abled students pursuing technical education.",
+      "amount": "₹50,000 per annum",
+      "eligibility_criteria": "Specially-abled student (disability >= 40%), family income < ₹8 LPA, admitted to AICTE approved course.",
+      "eligible_categories": ["GENERAL", "OBC", "SC", "ST", "EWS"],
+      "eligible_states": null,
+      "eligible_genders": null,
+      "max_family_income": 800000.0,
+      "min_academic_score": 50.0,
+      "source_url": "https://www.aicte-india.org",
+      "data_confidence": "HIGH"
+    },
+    {
+      "name": "Pragati Scholarship Scheme for Girl Students",
+      "provider": "AICTE",
+      "description": "Scholarship to promote technical education among girls.",
+      "amount": "₹50,000 per annum",
+      "eligibility_criteria": "Girl student, max 2 girls per family, family income < ₹8 LPA, admitted to AICTE approved course.",
+      "eligible_categories": ["GENERAL", "OBC", "SC", "ST", "EWS"],
+      "eligible_states": null,
+      "eligible_genders": ["F"],
+      "max_family_income": 800000.0,
+      "min_academic_score": 50.0,
+      "source_url": "https://www.aicte-india.org",
+      "data_confidence": "HIGH"
+    },
+    {
+      "name": "AICTE Swanath Scholarship Scheme",
+      "provider": "AICTE",
+      "description": "Scholarship for orphans, children of parents died due to Covid-19, and wards of Armed Forces.",
+      "amount": "₹50,000 per annum",
+      "eligibility_criteria": "Orphan or ward of parents who died of Covid-19 or Armed Forces, family income < ₹8 LPA.",
+      "eligible_categories": ["GENERAL", "OBC", "SC", "ST", "EWS"],
+      "eligible_states": null,
+      "eligible_genders": null,
+      "max_family_income": 800000.0,
+      "min_academic_score": 50.0,
+      "source_url": "https://www.aicte-india.org",
+      "data_confidence": "HIGH"
+    },
+    {
+      "name": "Rajarshi Chhatrapati Shahu Maharaj Shikshan Shulkh Shishyavrutti Yojna",
+      "provider": "Government of Maharashtra",
+      "description": "Tuition fee waiver scheme for economically backward students in Maharashtra.",
+      "amount": "50% to 100% tuition fee waiver",
+      "eligibility_criteria": "Maharashtra domicile, general/EWS, family income < ₹8 LPA.",
+      "eligible_categories": ["GENERAL", "EWS"],
+      "eligible_states": ["MH"],
+      "eligible_genders": null,
+      "max_family_income": 800000.0,
+      "min_academic_score": 50.0,
+      "source_url": "https://mahadbt.maharashtra.gov.in",
+      "data_confidence": "HIGH"
+    },
+    {
+      "name": "Dr. Panjabrao Deshmukh Vasatigruh Nirvah Bhatta Yojna",
+      "provider": "Government of Maharashtra",
+      "description": "Hostel maintenance allowance for Maharashtra students.",
+      "amount": "₹20,000 to ₹30,000 per annum",
+      "eligibility_criteria": "Maharashtra domicile, child of registered labor or alpabhudharak, family income < ₹8 LPA.",
+      "eligible_categories": ["GENERAL", "EWS", "OBC", "SC", "ST"],
+      "eligible_states": ["MH"],
+      "eligible_genders": null,
+      "max_family_income": 800000.0,
+      "min_academic_score": 50.0,
+      "source_url": "https://mahadbt.maharashtra.gov.in",
+      "data_confidence": "HIGH"
+    },
+    {
+      "name": "Karnataka Post-Matric Scholarship (SSP)",
+      "provider": "Government of Karnataka",
+      "description": "SSP portal scheme for post-matric students of Karnataka.",
+      "amount": "Varies by course and category",
+      "eligibility_criteria": "Karnataka domicile, SC/ST/OBC/Minority, family income limits depend on category.",
+      "eligible_categories": ["OBC", "SC", "ST"],
+      "eligible_states": ["KA"],
+      "eligible_genders": null,
+      "max_family_income": 250000.0,
+      "min_academic_score": 50.0,
+      "source_url": "https://ssp.postmatric.karnataka.gov.in",
+      "data_confidence": "HIGH"
+    },
+    {
+      "name": "UP Scholarship - Post Matric Other State",
+      "provider": "Government of Uttar Pradesh",
+      "description": "Uttar Pradesh scholarship for post matric students studying outside or inside UP.",
+      "amount": "Reimbursement of tuition fees",
+      "eligibility_criteria": "UP domicile, SC/ST/OBC/General, family income < ₹2 LPA (General/OBC) or < ₹2.5 LPA (SC/ST).",
+      "eligible_categories": ["GENERAL", "OBC", "SC", "ST", "EWS"],
+      "eligible_states": ["UP"],
+      "eligible_genders": null,
+      "max_family_income": 200000.0,
+      "min_academic_score": 50.0,
+      "source_url": "https://scholarship.up.gov.in",
+      "data_confidence": "HIGH"
+    },
+    {
+      "name": "OP Jindal Engineering and Management Scholarships (OPJEMS)",
+      "provider": "OP Jindal Group",
+      "description": "Merit-based scholarships for students of selected premier engineering institutes.",
+      "amount": "₹80,000 per annum",
+      "eligibility_criteria": "Top 10 academic performers in selected institutes (like IITs/NITs).",
+      "eligible_categories": ["GENERAL", "OBC", "SC", "ST", "EWS"],
+      "eligible_states": null,
+      "eligible_genders": null,
+      "max_family_income": null,
+      "min_academic_score": 85.0,
+      "source_url": "http://www.opjems.com",
+      "data_confidence": "HIGH"
+    },
+    {
+      "name": "Reliance Foundation Undergraduate Scholarships",
+      "provider": "Reliance Foundation",
+      "description": "Scholarship for meritorious students pursuing undergraduate studies.",
+      "amount": "Up to ₹2,00,000 over course duration",
+      "eligibility_criteria": "Class 12 score >= 60%, family income < ₹15 LPA (priority < ₹2.5 LPA).",
+      "eligible_categories": ["GENERAL", "OBC", "SC", "ST", "EWS"],
+      "eligible_states": null,
+      "eligible_genders": null,
+      "max_family_income": 1500000.0,
+      "min_academic_score": 60.0,
+      "source_url": "https://www.reliancefoundation.org",
+      "data_confidence": "HIGH"
+    },
+    {
+      "name": "Aditya Birla Capital Scholarship",
+      "provider": "Aditya Birla Capital Foundation",
+      "description": "Scholarship support for school and college students.",
+      "amount": "Up to ₹60,000 one-time",
+      "eligibility_criteria": "Score >= 60% in previous exam, family income < ₹6 LPA.",
+      "eligible_categories": ["GENERAL", "OBC", "SC", "ST", "EWS"],
+      "eligible_states": null,
+      "eligible_genders": null,
+      "max_family_income": 600000.0,
+      "min_academic_score": 60.0,
+      "source_url": "https://www.adityabirlacapital.com",
+      "data_confidence": "HIGH"
+    },
+    {
+      "name": "L'Oréal India For Young Women In Science Scholarship",
+      "provider": "L'Oréal India",
+      "description": "Scholarship supporting young women pursuing career in science.",
+      "amount": "₹2,50,000 over course duration",
+      "eligibility_criteria": "Girl student, Class 12 score >= 85% in PCB/PCM, family income < ₹6 LPA.",
+      "eligible_categories": ["GENERAL", "OBC", "SC", "ST", "EWS"],
+      "eligible_states": null,
+      "eligible_genders": ["F"],
+      "max_family_income": 600000.0,
+      "min_academic_score": 85.0,
+      "source_url": "https://www.loreal.com",
+      "data_confidence": "HIGH"
+    }
+  ],
+  "branches": [
+    {
+      "code": "CS",
+      "name": "Computer Science",
+      "iit_placement_rate": 0.95,
+      "iit_median_salary": 1800000.0,
+      "nit_placement_rate": 0.85,
+      "nit_median_salary": 1000000.0,
+      "salary_range": "₹8-12 LPA",
+      "transition_options": "{\"MS\": 0.10, \"MBA\": 0.05}",
+      "jobs": [
+        {
+          "title": "Software Engineer",
+          "domain": "IT",
+          "percentage": 0.70,
+          "min_salary": 800000,
+          "max_salary": 1200000,
+          "median_salary": 1000000,
+          "companies": ["Google", "Microsoft", "TCS"],
+          "skills": ["Algorithms", "Data Structures", "System Design"]
+        },
+        {
+          "title": "Data Scientist",
+          "domain": "IT",
+          "percentage": 0.20,
+          "min_salary": 900000,
+          "max_salary": 1400000,
+          "median_salary": 1100000,
+          "companies": ["Meta", "Amazon", "Netflix"],
+          "skills": ["Machine Learning", "Python", "Statistics"]
+        }
+      ],
+      "pg_feeds": ["M.Tech in Computer Science", "MS in Artificial Intelligence"],
+      "core_skills": ["Algorithms", "Programming", "Databases"]
+    },
+    {
+      "code": "EC",
+      "name": "Electronics & Communication",
+      "iit_placement_rate": 0.80,
+      "iit_median_salary": 900000.0,
+      "nit_placement_rate": 0.65,
+      "nit_median_salary": 600000.0,
+      "salary_range": "₹6-9 LPA",
+      "transition_options": "{\"GATE\": 0.20, \"MS\": 0.15, \"MBA\": 0.10}",
+      "jobs": [
+        {
+          "title": "VLSI Engineer",
+          "domain": "Hardware",
+          "percentage": 0.50,
+          "min_salary": 700000,
+          "max_salary": 1100000,
+          "median_salary": 900000,
+          "companies": ["Intel", "Qualcomm", "Texas Instruments"],
+          "skills": ["Digital Electronics", "Verilog", "Computer Architecture"]
+        },
+        {
+          "title": "Embedded Systems Engineer",
+          "domain": "Hardware",
+          "percentage": 0.30,
+          "min_salary": 500000,
+          "max_salary": 800000,
+          "median_salary": 650000,
+          "companies": ["Bosch", "Samsung", "NXP"],
+          "skills": ["C Programming", "Microcontrollers", "RTOS"]
+        }
+      ],
+      "pg_feeds": ["M.Tech in VLSI Design", "MS in Microelectronics"],
+      "core_skills": ["Digital Systems", "Embedded Systems", "Analog Circuits"]
+    },
+    {
+      "code": "ME",
+      "name": "Mechanical Engineering",
+      "iit_placement_rate": 0.80,
+      "iit_median_salary": 900000.0,
+      "nit_placement_rate": 0.65,
+      "nit_median_salary": 600000.0,
+      "salary_range": "₹5-7 LPA",
+      "transition_options": "{\"GATE\": 0.25, \"MBA\": 0.30}",
+      "jobs": [
+        {
+          "title": "Design Engineer",
+          "domain": "Mechanical",
+          "percentage": 0.40,
+          "min_salary": 450000,
+          "max_salary": 700000,
+          "median_salary": 550000,
+          "companies": ["L&T", "Tata Motors", "Mahindra"],
+          "skills": ["CAD/CAM", "FEA", "SolidWorks"]
+        },
+        {
+          "title": "Manufacturing Engineer",
+          "domain": "Mechanical",
+          "percentage": 0.35,
+          "min_salary": 400000,
+          "max_salary": 650000,
+          "median_salary": 500000,
+          "companies": ["Maruti Suzuki", "Bajaj Auto", "Thermax"],
+          "skills": ["Operations Research", "CNC", "Quality Control"]
+        }
+      ],
+      "pg_feeds": ["M.Tech in Machine Design", "MS in Robotics"],
+      "core_skills": ["Thermodynamics", "Solid Mechanics", "Fluid Mechanics"]
+    },
+    {
+      "code": "CE",
+      "name": "Civil Engineering",
+      "iit_placement_rate": 0.80,
+      "iit_median_salary": 900000.0,
+      "nit_placement_rate": 0.65,
+      "nit_median_salary": 600000.0,
+      "salary_range": "₹4.5-6 LPA",
+      "transition_options": "{\"GATE\": 0.30, \"MBA\": 0.20}",
+      "jobs": [
+        {
+          "title": "Structural Engineer",
+          "domain": "Civil",
+          "percentage": 0.45,
+          "min_salary": 400000,
+          "max_salary": 650000,
+          "median_salary": 500000,
+          "companies": ["L&T", "DLF", "Tata Projects"],
+          "skills": ["STAAD Pro", "Concrete Technology", "Steel Design"]
+        },
+        {
+          "title": "Site Engineer",
+          "domain": "Civil",
+          "percentage": 0.40,
+          "min_salary": 350000,
+          "max_salary": 550000,
+          "median_salary": 450000,
+          "companies": ["Shapoorji Pallonji", "HCC", "Gammon"],
+          "skills": ["Project Management", "Surveying", "AutoCAD"]
+        }
+      ],
+      "pg_feeds": ["M.Tech in Structural Engineering", "MS in Civil Engineering"],
+      "core_skills": ["Structural Analysis", "Geotechnical Engineering", "Transportation"]
+    },
+    {
+      "code": "CH",
+      "name": "Chemical Engineering",
+      "iit_placement_rate": 0.80,
+      "iit_median_salary": 900000.0,
+      "nit_placement_rate": 0.65,
+      "nit_median_salary": 600000.0,
+      "salary_range": "₹5.5-8 LPA",
+      "transition_options": "{\"GATE\": 0.20, \"MS\": 0.15, \"MBA\": 0.15}",
+      "jobs": [
+        {
+          "title": "Process Engineer",
+          "domain": "Chemical",
+          "percentage": 0.50,
+          "min_salary": 550000,
+          "max_salary": 850000,
+          "median_salary": 700000,
+          "companies": ["Reliance Industries", "ONGC", "IOCL"],
+          "skills": ["Process Simulation", "Aspen Plus", "P&ID"]
+        },
+        {
+          "title": "Chemical Analyst",
+          "domain": "Chemical",
+          "percentage": 0.30,
+          "min_salary": 400000,
+          "max_salary": 650000,
+          "median_salary": 500000,
+          "companies": ["Asian Paints", "Pidilite", "HUL"],
+          "skills": ["Analytical Chemistry", "Spectroscopy", "Reactors"]
+        }
+      ],
+      "pg_feeds": ["M.Tech in Chemical Engineering", "MS in Materials Science"],
+      "core_skills": ["Mass Transfer", "Heat Transfer", "Reaction Engineering"]
+    },
+    {
+      "code": "EE",
+      "name": "Electrical Engineering",
+      "iit_placement_rate": 0.80,
+      "iit_median_salary": 900000.0,
+      "nit_placement_rate": 0.65,
+      "nit_median_salary": 600000.0,
+      "salary_range": "₹6-8.5 LPA",
+      "transition_options": "{\"GATE\": 0.25, \"MBA\": 0.15}",
+      "jobs": [
+        {
+          "title": "Power Systems Engineer",
+          "domain": "Electrical",
+          "percentage": 0.45,
+          "min_salary": 500000,
+          "max_salary": 800000,
+          "median_salary": 650000,
+          "companies": ["PowerGrid", "NTPC", "Siemens"],
+          "skills": ["Power Systems", "Grid Safety", "Electrical Machines"]
+        },
+        {
+          "title": "Control Systems Engineer",
+          "domain": "Electrical",
+          "percentage": 0.35,
+          "min_salary": 450000,
+          "max_salary": 750000,
+          "median_salary": 600000,
+          "companies": ["ABB", "Schneider Electric", "Rockwell"],
+          "skills": ["Control Theory", "MATLAB", "PLC Programming"]
+        }
+      ],
+      "pg_feeds": ["M.Tech in Power Electronics", "MS in Control Systems"],
+      "core_skills": ["Power Systems", "Electromagnetics", "Signals & Systems"]
+    },
+    {
+      "code": "IT",
+      "name": "Information Technology",
+      "iit_placement_rate": 0.95,
+      "iit_median_salary": 1800000.0,
+      "nit_placement_rate": 0.85,
+      "nit_median_salary": 1000000.0,
+      "salary_range": "₹8-11.5 LPA",
+      "transition_options": "{\"MS\": 0.10, \"MBA\": 0.05}",
+      "jobs": [
+        {
+          "title": "Systems Analyst",
+          "domain": "IT",
+          "percentage": 0.50,
+          "min_salary": 700000,
+          "max_salary": 1100000,
+          "median_salary": 900000,
+          "companies": ["Accenture", "Infosys", "Wipro"],
+          "skills": ["Systems Analysis", "SQL", "Requirements Gathering"]
+        },
+        {
+          "title": "Network Administrator",
+          "domain": "IT",
+          "percentage": 0.35,
+          "min_salary": 600000,
+          "max_salary": 950000,
+          "median_salary": 750000,
+          "companies": ["Cisco", "Juniper Networks", "IBM"],
+          "skills": ["Networking", "CCNA", "Security Policies"]
+        }
+      ],
+      "pg_feeds": ["M.Tech in Information Technology", "MS in Software Engineering"],
+      "core_skills": ["Networking", "Databases", "Software Engineering"]
+    },
+    {
+      "code": "BT",
+      "name": "Biotechnology",
+      "iit_placement_rate": 0.80,
+      "iit_median_salary": 900000.0,
+      "nit_placement_rate": 0.65,
+      "nit_median_salary": 600000.0,
+      "salary_range": "₹4.5-6.5 LPA",
+      "transition_options": "{\"MS\": 0.30, \"GATE\": 0.10}",
+      "jobs": [
+        {
+          "title": "Biotechnologist",
+          "domain": "Biotech",
+          "percentage": 0.40,
+          "min_salary": 400000,
+          "max_salary": 650000,
+          "median_salary": 500000,
+          "companies": ["Biocon", "Serum Institute", "Dr. Reddys"],
+          "skills": ["Microbiology", "Recombinant DNA", "Bioreactors"]
+        },
+        {
+          "title": "Research Analyst",
+          "domain": "Biotech",
+          "percentage": 0.35,
+          "min_salary": 450000,
+          "max_salary": 700000,
+          "median_salary": 550000,
+          "companies": ["Novartis", "Pfizer", "Syngene"],
+          "skills": ["Data Analysis", "R Programming", "Clinical Research"]
+        }
+      ],
+      "pg_feeds": ["M.Tech in Biotechnology", "MS in Bioinformatics"],
+      "core_skills": ["Cell Biology", "Biochemistry", "Molecular Biology"]
+    },
+    {
+      "code": "MN",
+      "name": "Mining Engineering",
+      "iit_placement_rate": 0.80,
+      "iit_median_salary": 900000.0,
+      "nit_placement_rate": 0.65,
+      "nit_median_salary": 600000.0,
+      "salary_range": "₹5.5-8.5 LPA",
+      "transition_options": "{\"GATE\": 0.15, \"MBA\": 0.20}",
+      "jobs": [
+        {
+          "title": "Mining Engineer",
+          "domain": "Mining",
+          "percentage": 0.60,
+          "min_salary": 550000,
+          "max_salary": 900000,
+          "median_salary": 700000,
+          "companies": ["Coal India", "Hindustan Zinc", "Adani Enterprises"],
+          "skills": ["Mine Surveying", "Rock Mechanics", "Explosives Handling"]
+        },
+        {
+          "title": "Safety Inspector",
+          "domain": "Mining",
+          "percentage": 0.25,
+          "min_salary": 500000,
+          "max_salary": 800000,
+          "median_salary": 650000,
+          "companies": ["Tata Steel", "JSW Steel", "Rio Tinto"],
+          "skills": ["Safety Protocols", "Risk Assessment", "Ventilation"]
+        }
+      ],
+      "pg_feeds": ["M.Tech in Mining Engineering", "MS in Earth Sciences"],
+      "core_skills": ["Mine Ventilation", "Drilling", "Blasting"]
+    }
+  ]
+}

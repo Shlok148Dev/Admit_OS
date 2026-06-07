@@ -1,0 +1,53 @@
+{
+  "type": "record",
+  "name": "ValidatedGroundTruth",
+  "namespace": "com.admitos.data",
+  "doc": "Schema for validated cutoff and seat matrix data ready for consumption",
+  "fields": [
+    {
+      "name": "data_type",
+      "type": "string",
+      "doc": "Type of data (e.g., CUTOFF, SEAT_MATRIX)"
+    },
+    {
+      "name": "exam",
+      "type": "string",
+      "doc": "Target exam (e.g., JEE_MAIN, NEET)"
+    },
+    {
+      "name": "year",
+      "type": "int",
+      "doc": "Counseling year"
+    },
+    {
+      "name": "round",
+      "type": "int",
+      "doc": "Counseling round number"
+    },
+    {
+      "name": "payload",
+      "type": "string",
+      "doc": "JSON string containing the raw cutoff list or seat matrix updates"
+    },
+    {
+      "name": "confidence",
+      "type": {
+        "type": "enum",
+        "name": "ConfidenceTier",
+        "symbols": ["HIGH", "MEDIUM", "LOW"]
+      },
+      "doc": "Data confidence level (high confidence matches multiple sources, low requires SME review)"
+    },
+    {
+      "name": "sme_reviewed",
+      "type": "boolean",
+      "default": false,
+      "doc": "True if an SME reviewed this cutoff data manually"
+    },
+    {
+      "name": "source_url",
+      "type": "string",
+      "doc": "URL citing the source of the ground truth data"
+    }
+  ]
+}

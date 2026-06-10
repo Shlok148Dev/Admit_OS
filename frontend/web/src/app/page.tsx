@@ -2,8 +2,10 @@
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { ChevronDown, Check, Compass, Search, Database, AlertTriangle, TrendingUp, Cpu } from 'lucide-react'
-import TrendGlobe from '@/components/3d/TrendGlobe'
+import dynamic from 'next/dynamic'
 import PageTransition from '@/components/motion/PageTransition'
+
+const TrendGlobe = dynamic(() => import('@/components/3d/TrendGlobe'), { ssr: false })
 
 export default function LandingPage() {
   const features = [

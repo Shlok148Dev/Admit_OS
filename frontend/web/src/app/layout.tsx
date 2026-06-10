@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
-import { Geist, JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "next-themes";
 import Navbar from "@/components/nav/Navbar";
 import MotionProvider from "@/components/motion/MotionProvider";
+import { QueryProvider } from "@/providers/query-provider";
 import { Toaster } from "react-hot-toast";
 
-const geistSans = Geist({
+const geistSans = Inter({
   subsets: ["latin"],
   variable: "--font-geist-sans",
 });
@@ -35,15 +36,17 @@ export default function RootLayout({
           forcedTheme="dark"
           enableSystem={false}
         >
-          <div className="relative flex flex-col min-h-screen overflow-x-hidden">
-            <Navbar />
-            <MotionProvider>
-              <main className="flex-grow pt-20">
-                {children}
-              </main>
-            </MotionProvider>
-            <Toaster position="bottom-right" />
-          </div>
+          <QueryProvider>
+            <div className="relative flex flex-col min-h-screen overflow-x-hidden">
+              <Navbar />
+              <MotionProvider>
+                <main className="flex-grow pt-20">
+                  {children}
+                </main>
+              </MotionProvider>
+              <Toaster position="bottom-right" />
+            </div>
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>

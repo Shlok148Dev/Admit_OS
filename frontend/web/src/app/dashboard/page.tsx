@@ -1,12 +1,14 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import PageTransition from '@/components/motion/PageTransition'
-import TrendGlobe from '@/components/3d/TrendGlobe'
+import dynamic from 'next/dynamic'
 import AnimatedStatCard from '@/components/dashboard/AnimatedStatCard'
 import EmergingStrip from '@/components/dashboard/EmergingStrip'
 import TrendCard from '@/components/trends/TrendCard'
 import TrendCardSkeleton from '@/components/trends/TrendCardSkeleton'
 import { useTrendStore, Trend } from '@/store/trends'
+
+const TrendGlobe = dynamic(() => import('@/components/3d/TrendGlobe'), { ssr: false })
 
 // --- Mock Data Generator ---
 function generateMockTrends(count = 20): Trend[] {

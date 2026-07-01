@@ -27,7 +27,7 @@ async def lifespan(app: FastAPI):
 
     try:
         with SessionLocal() as db_session:
-            with next(get_neo4j_session()) as neo4j_sess:
+            with get_neo4j_session() as neo4j_sess:
                 seed_all(db_session, neo4j_sess)
         logger.info("Successfully seeded data on startup.")
     except Exception as e:
@@ -46,7 +46,7 @@ app = FastAPI(
 @app.post("/v1/career/paths", response_model=CareerPathsResponse)
 def get_paths(req: CareerPathsRequest) -> CareerPathsResponse:
     try:
-        with next(get_neo4j_session()) as session:
+        with get_neo4j_session() as session:
             paths = get_career_paths(session, req.branch_code.upper(), req.college_code)
             if not paths:
                 raise HTTPException(status_code=404, detail=f"Branch code {req.branch_code} not found")
@@ -60,7 +60,7 @@ def get_paths(req: CareerPathsRequest) -> CareerPathsResponse:
 @app.get("/v1/career/branch/{code}", response_model=BranchOverviewResponse)
 def get_branch(code: str) -> BranchOverviewResponse:
     try:
-        with next(get_neo4j_session()) as session:
+        with get_neo4j_session() as session:
             overview = build_branch_overview(session, code.upper())
             if not overview:
                 raise HTTPException(status_code=404, detail=f"Branch code {code} not found")
@@ -84,7 +84,7 @@ def compare_branches(
         return BranchCompareResponse(**cached)
 
     try:
-        with next(get_neo4j_session()) as session:
+        with get_neo4j_session() as session:
             overview1 = build_branch_overview(session, b1_key)
             overview2 = build_branch_overview(session, b2_key)
             if not overview1 or not overview2:

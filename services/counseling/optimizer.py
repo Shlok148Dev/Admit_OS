@@ -25,8 +25,8 @@ EXAM_COUNSELING_CONFIG: Dict[str, Dict[str, Any]] = {
     },
     "NEET": {
         "counseling_body": "MCC",
-        "has_upgrade_rounds": True,
-        "upgrade_strategy": "mop_up",
+        "has_upgrade_rounds": False,
+        "upgrade_strategy": None,
         "reach_probability": 0.40,
         "reach_lower_bound": 0.30,
         "safe_probability": 0.70,
@@ -43,8 +43,8 @@ EXAM_COUNSELING_CONFIG: Dict[str, Dict[str, Any]] = {
     },
     "KCET": {
         "counseling_body": "KEA",
-        "has_upgrade_rounds": True,
-        "upgrade_strategy": "float_freeze",
+        "has_upgrade_rounds": False,
+        "upgrade_strategy": None,
         "reach_probability": 0.40,
         "reach_lower_bound": 0.25,
         "safe_probability": 0.70,
@@ -58,7 +58,47 @@ EXAM_COUNSELING_CONFIG: Dict[str, Dict[str, Any]] = {
         "reach_lower_bound": 0.25,
         "safe_probability": 0.70,
         "key_rule": "Direct iterations without slide/float. Refund policy applies on seat cancellation."
+    },
+    "WBJEE": {
+        "counseling_body": "WBJEEB",
+        "has_upgrade_rounds": True,
+        "upgrade_strategy": "float_freeze",
+        "reach_probability": 0.40,
+        "reach_lower_bound": 0.25,
+        "safe_probability": 0.70,
+        "key_rule": "Seats allotted in Round 1 must pay seat acceptance fee and report for verification."
+    },
+    "AP_EAPCET": {
+        "counseling_body": "APSCHE",
+        "has_upgrade_rounds": True,
+        "upgrade_strategy": "float_freeze",
+        "reach_probability": 0.40,
+        "reach_lower_bound": 0.25,
+        "safe_probability": 0.70,
+        "key_rule": "Candidates must upload documents online and report to the allotted colleges after final phase."
     }
+}
+
+EXAM_ELIGIBLE_COLLEGE_TYPES: Dict[str, List[str]] = {
+    "JEE_MAIN": ["NIT", "IIIT", "GFT5", "GFTI"],
+    "JEE_ADVANCED": ["IIT"],
+    "NEET": ["AIIMS", "STATE", "PRIVATE", "DEEMED"],
+    "MHT_CET": ["STATE", "PRIVATE"],
+    "KCET": ["STATE", "PRIVATE"],
+    "BITSAT": ["BITS"],
+    "WBJEE": ["STATE", "PRIVATE"],
+    "AP_EAPCET": ["STATE", "PRIVATE"]
+}
+
+EXAM_THRESHOLDS: Dict[str, Dict[str, float]] = {
+    "JEE_MAIN": {"safe": 0.70, "target": 0.40},
+    "JEE_ADVANCED": {"safe": 0.70, "target": 0.40},
+    "NEET": {"safe": 0.70, "target": 0.40},
+    "MHT_CET": {"safe": 0.70, "target": 0.40},
+    "KCET": {"safe": 0.70, "target": 0.40},
+    "BITSAT": {"safe": 0.70, "target": 0.40},
+    "WBJEE": {"safe": 0.70, "target": 0.40},
+    "AP_EAPCET": {"safe": 0.70, "target": 0.40}
 }
 
 STATE_REGIONS: Dict[str, str] = {
@@ -137,6 +177,59 @@ def compute_preference_score(college: CandidateCollege, pref: Preferences, home_
         pref.fees_priority * f_score
     )
 
+def get_college_type(college_code: str) -> str:
+    code = college_code.upper()
+    if "IIIT_" in code or code == "IIIT":
+        return "IIIT"
+    if "IIT_" in code or code == "IIT":
+        return "IIT"
+    if "NIT_" in code or code == "NIT":
+        return "NIT"
+    if "AIIMS_" in code or code == "AIIMS":
+        return "AIIMS"
+    if "BITS_" in code or "BITSAT" in code or code.startswith("BITS"):
+        return "BITS"
+    if "GFTI" in code or "GFT5" in code:
+        return "GFTI"
+    if code in ("COEP_PUNE", "VJTI_MUMBAI", "ICT_MUMBAI", "BMSCE_BANGALORE", "KGMU_LUCKNOW", "MAMC_DELHI"):
+        return "STATE"
+    if code in ("RVCE_BANGALORE", "PESU_BANGALORE", "SPIT_MUMBAI", "DY_PATIL_PUNE"):
+        return "PRIVATE"
+    if "IIIT" in code: return "IIIT"
+    if "IIT" in code: return "IIT"
+    if "NIT" in code: return "NIT"
+    if "AIIMS" in code: return "AIIMS"
+    if "BITS" in code: return "BITS"
+    if "GFTI" in code: return "GFTI"
+    if "PRIVATE" in code: return "PRIVATE"
+    return "STATE"
+
+def get_choice_label(prob: float, exam: str) -> str:
+    exam_upper = exam.upper()
+    thresholds = EXAM_THRESHOLDS.get(exam_upper, {"safe": 0.70, "target": 0.40})
+    if prob >= thresholds["safe"]:
+        return "SAFE"
+    elif prob >= thresholds["target"]:
+        return "TARGET"
+    return "REACH"
+
+def filter_colleges_by_exam(colleges: List[CandidateCollege], exam: str) -> List[CandidateCollege]:
+    exam_upper = exam.upper()
+    allowed_types = EXAM_ELIGIBLE_COLLEGE_TYPES.get(exam_upper, [])
+    if not allowed_types:
+        return colleges
+    filtered = []
+    for c in colleges:
+        c_type = getattr(c, "college_type", None)
+        if not c_type and hasattr(c, "model_extra") and c.model_extra:
+            c_type = c.model_extra.get("college_type")
+        if not c_type:
+            c_type = get_college_type(c.college_code)
+        
+        if c_type.upper() in [t.upper() for t in allowed_types]:
+            filtered.append(c)
+    return filtered
+
 def sort_by_risk_appetite(choices: List[ChoiceOutput], risk_appetite: str) -> List[ChoiceOutput]:
     """Sort choices according to the risk appetite criteria."""
     appetite = risk_appetite.upper()
@@ -145,13 +238,16 @@ def sort_by_risk_appetite(choices: List[ChoiceOutput], risk_appetite: str) -> Li
     elif appetite == "BALANCED":
         choices.sort(key=lambda x: (-x.final_score, -x.preference_score, -x.admission_probability))
     else:  # AGGRESSIVE
-        choices.sort(key=lambda x: (-x.preference_score, -x.admission_probability))
+        choices.sort(key=lambda x: (x.admission_probability < 0.10, -x.preference_score, -x.admission_probability))
     return choices
 
-def apply_upgrade_optimization(choices: List[ChoiceOutput], config: Optional[Dict[str, Any]] = None) -> List[ChoiceOutput]:
+def apply_upgrade_optimization(choices: List[ChoiceOutput], config: Optional[Dict[str, Any]] = None, exam: str = "JEE_MAIN") -> List[ChoiceOutput]:
     """Move reach options (>reach_lower_bound prob) exactly one position above the first safe option (>safe_probability)."""
+    if exam.upper() in ("NEET", "MHT_CET", "KCET"):
+        return choices
+        
     if config is None:
-        config = EXAM_COUNSELING_CONFIG["JEE_MAIN"]
+        config = EXAM_COUNSELING_CONFIG.get(exam.upper(), EXAM_COUNSELING_CONFIG["JEE_MAIN"])
         
     if not config.get("has_upgrade_rounds", True):
         return choices
@@ -218,8 +314,9 @@ def optimize_choice_list(
     colleges: List[CandidateCollege], pref: Preferences, home_state: str, risk_appetite: str, exam: str = "JEE_MAIN"
 ) -> List[ChoiceOutput]:
     """Scoring, sorting, and upgrading the candidate choices."""
+    filtered_colleges = filter_colleges_by_exam(colleges, exam)
     choices = []
-    for c in colleges:
+    for c in filtered_colleges:
         pref_score = compute_preference_score(c, pref, home_state)
         if risk_appetite.upper() == "BALANCED":
             final_score = 0.6 * pref_score + 0.4 * c.admission_probability
@@ -233,12 +330,13 @@ def optimize_choice_list(
             preference_score=round(pref_score, 4),
             final_score=round(final_score, 4),
             explanation="",
-            choice_number=None
+            choice_number=None,
+            label=get_choice_label(c.admission_probability, exam)
         ))
         
     sorted_choices = sort_by_risk_appetite(choices, risk_appetite)
     config = EXAM_COUNSELING_CONFIG.get(exam.upper(), EXAM_COUNSELING_CONFIG["JEE_MAIN"])
-    optimized = apply_upgrade_optimization(sorted_choices, config)
+    optimized = apply_upgrade_optimization(sorted_choices, config, exam=exam)
     
     for i, c in enumerate(optimized):
         c.choice_number = i + 1

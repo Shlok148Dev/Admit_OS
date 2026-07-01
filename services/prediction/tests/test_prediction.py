@@ -101,7 +101,7 @@ def test_health_check(client: TestClient) -> None:
 def test_predict_college_integration(client: TestClient) -> None:
     """Test predicting college options and verify cutoffs are within 20%."""
     payload = {
-        "exam": "JEE_MAIN",
+        "exam": "JEE_ADVANCED",
         "rank": 850,
         "percentile": None,
         "category": "GENERAL",

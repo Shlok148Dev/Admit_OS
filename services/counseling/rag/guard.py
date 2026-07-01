@@ -73,6 +73,7 @@ class HallucinationGuard:
         answer: str,
         retrieved_chunks: List[Tuple[Chunk, float]],
         top_score: float,
+        query: Optional[str] = None,
     ) -> GuardResult:
         """Run all guard checks and return a GuardResult."""
         chunks = [c for c, _ in retrieved_chunks]
@@ -100,6 +101,10 @@ class HallucinationGuard:
 
         # Check numeric hallucinations
         numbers_in_answer = _extract_numbers(answer)
+        if query:
+            numbers_in_query = set(_extract_numbers(query))
+            numbers_in_answer = [n for n in numbers_in_answer if n not in numbers_in_query]
+
         if numbers_in_answer and not _numbers_in_sources(numbers_in_answer, chunks):
             logger.warning("Number hallucination detected in answer")
             return GuardResult(

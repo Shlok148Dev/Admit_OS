@@ -248,6 +248,33 @@ def matches_filters(
     col: College, branch_code: str, request: CollegePredictionRequest
 ) -> bool:
     """Check if college and branch match the requested filters."""
+    # Filter by exam compatibility
+    if request.exam == ExamEnum.NEET:
+        if col.type not in ("DEEMED", "MEDICAL") and col.college_code not in ("AIIMS_DELHI", "MAMC_DELHI"):
+            return False
+        if branch_code not in ("MBBS", "BDS"):
+            return False
+    elif request.exam == ExamEnum.MHT_CET:
+        if col.type not in ("STATE", "PRIVATE") or col.state != "MH":
+            return False
+        if branch_code not in ("CS", "EC", "ME"):
+            return False
+    elif request.exam == ExamEnum.KCET:
+        if col.type not in ("STATE", "PRIVATE") or col.state != "KA":
+            return False
+    elif request.exam == ExamEnum.JEE_ADVANCED:
+        if col.type != "IIT":
+            return False
+        if branch_code not in ("CS", "EC", "ME"):
+            return False
+    elif request.exam == ExamEnum.JEE_MAIN:
+        if col.type not in ("NIT", "IIIT", "GFTI", "STATE", "PRIVATE"):
+            return False
+        if col.type == "IIT":
+            return False
+        if branch_code not in ("CS", "EC", "ME"):
+            return False
+
     f = request.filters
     if not f:
         return True
@@ -437,7 +464,22 @@ def predict_college(
     try:
         predictions = run_prediction_pipeline(request, db)
         log_predictions_to_db(db, request, predictions)
+        
+        # Sort predictions descending by admission probability
+        predictions.sort(
+            key=lambda p: p.admission_probability,
+            reverse=True  # HIGHEST probability first
+        )
+        
         response = make_prediction_response(predictions)
+        
+        # If no predictions have probability > 0.05, add a warning field
+        if all(p.admission_probability <= 0.05 for p in predictions):
+            response.low_probability_warning = (
+                "All predictions show less than 5% probability for your rank. "
+                "Consider adjusting your filters or checking a higher rank range."
+            )
+            
         set_cached_prediction(cache_key, response.model_dump())
         return response
     except Exception as db_ex:

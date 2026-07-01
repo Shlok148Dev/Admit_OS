@@ -13,8 +13,11 @@
   "dependencies": {
     "@tanstack/react-query": "^5.28.4",
     "expo": "~51.0.8",
+    "expo-blur": "^56.0.3",
     "expo-constants": "~16.0.2",
+    "expo-haptics": "^56.0.3",
     "expo-image-manipulator": "~12.0.5",
+    "expo-linear-gradient": "^56.0.4",
     "expo-linking": "~6.3.1",
     "expo-router": "~3.5.14",
     "expo-status-bar": "~1.12.1",

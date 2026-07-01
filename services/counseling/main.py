@@ -2,9 +2,11 @@ import logging
 import os
 import secrets
 import time
-from typing import Any, Dict, List
-from fastapi import FastAPI, HTTPException, Depends, status
+import json
+from typing import Any, Dict, List, Optional
+from fastapi import FastAPI, HTTPException, Depends, status, Header
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
+import redis
 
 from .schemas import (
     OptimizeChoicesRequest, OptimizeChoicesResponse,
@@ -22,6 +24,7 @@ from .rules import JOSAA_RULES
 from .rag.retriever import CounselingRetriever
 from .rag.guard import HallucinationGuard
 from .rag.chat import ARIAChatEngine
+from .config import settings
 
 logger: logging.Logger = logging.getLogger("counseling_service.main")
 
@@ -29,6 +32,24 @@ degraded_mode: bool = False
 _total_requests: int = 0
 _cache_hits: int = 0
 _latencies: List[float] = []
+
+# Initialize Redis client
+try:
+    if settings.REDIS_URL:
+        redis_client = redis.from_url(settings.REDIS_URL, decode_responses=True)
+    else:
+        redis_client = redis.Redis(
+            host=settings.REDIS_HOST,
+            port=settings.REDIS_PORT,
+            db=settings.REDIS_DB,
+            password=settings.REDIS_PASSWORD or None,
+            decode_responses=True
+        )
+    redis_client.ping()
+    logger.info("Successfully connected to Redis for chat history.")
+except Exception as e:
+    logger.warning(f"Redis not available, defaulting to memory/no history: {e}")
+    redis_client = None
 
 security = HTTPBasic()
 
@@ -48,6 +69,7 @@ def authenticate_admin(credentials: HTTPBasicCredentials = Depends(security)) ->
 _retriever = CounselingRetriever()
 _guard = HallucinationGuard()
 _chat_engine = ARIAChatEngine(retriever=_retriever, guard=_guard)
+
 
 
 app = FastAPI(
@@ -82,7 +104,8 @@ def optimize_choices(request: OptimizeChoicesRequest) -> OptimizeChoicesResponse
                 fees_per_year=c.fees_per_year,
                 nirf_rank=c.nirf_rank,
                 quota=c.quota,
-                reason=c.explanation
+                reason=c.explanation,
+                label=c.label
             ))
         
         risk_score = 85 if request.risk_appetite.upper() == "AGGRESSIVE" else (50 if request.risk_appetite.upper() == "BALANCED" else 20)
@@ -103,7 +126,8 @@ def optimize_choices(request: OptimizeChoicesRequest) -> OptimizeChoicesResponse
             exam_counseling_body=config.get("counseling_body"),
             exam_has_upgrade_rounds=config.get("has_upgrade_rounds"),
             exam_key_rule=config.get("key_rule"),
-            all_reach_warning=all_reach_warning
+            all_reach_warning=all_reach_warning,
+            colleges_filtered_from=len(request.candidate_colleges)
         )
     except Exception as e:
         logger.error(f"Error optimizing choices: {e}", exc_info=True)
@@ -186,19 +210,45 @@ def chat(request: ChatRequest) -> ChatResponse:
             warning="Degraded mode active"
         )
     try:
-        return _chat_engine.chat(
+        redis_key = f"chat_history:{request.session_id}"
+        stored_history = []
+        if redis_client:
+            try:
+                data = redis_client.get(redis_key)
+                if data:
+                    stored_history = json.loads(data)
+            except Exception as e:
+                logger.error(f"Error reading from Redis: {e}")
+
+        # If user passes history in request, use it, otherwise fall back to Redis stored history
+        history = request.history if request.history else stored_history
+
+        response = _chat_engine.chat(
             query=request.query,
-            history=request.history,
+            history=history,
             exam_type=request.exam_type,
             student_context=request.student_context
         )
+
+        # Append interaction
+        updated_history = list(history)
+        updated_history.append({"role": "user", "content": request.query})
+        updated_history.append({"role": "assistant", "content": response.answer})
+
+        if redis_client:
+            try:
+                redis_client.setex(redis_key, 86400, json.dumps(updated_history))
+            except Exception as e:
+                logger.error(f"Error writing to Redis: {e}")
+
+        return response
     except Exception as e:
         logger.error(f"Error in chat handler: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error during chat retrieval.")
 
 
 @app.post("/v1/chat/query", response_model=ChatQueryResponse)
-def chat_query(request: ChatQueryRequest) -> ChatQueryResponse:
+def chat_query(request: ChatQueryRequest, x_session_id: Optional[str] = Header(None)) -> ChatQueryResponse:
     """Conversational Q&A chat endpoint (RAG-powered rules lookup) styled for the Next.js/Expo frontend contract."""
     if degraded_mode:
         return ChatQueryResponse(
@@ -208,13 +258,37 @@ def chat_query(request: ChatQueryRequest) -> ChatQueryResponse:
             time_warning="Degraded mode active"
         )
     try:
+        session_id = x_session_id or "default_query_session"
+        redis_key = f"chat_history:{session_id}"
+        stored_history = []
+        if redis_client:
+            try:
+                data = redis_client.get(redis_key)
+                if data:
+                    stored_history = json.loads(data)
+            except Exception as e:
+                logger.error(f"Error reading from Redis: {e}")
+
+        history = request.history if request.history is not None else stored_history
+
         chat_resp = _chat_engine.chat(
             query=request.message,
-            history=request.history or [],
+            history=history,
             exam_type=request.exam_type or "JEE_MAIN",
             student_context={}
         )
         
+        # Save back to Redis
+        updated_history = list(history)
+        updated_history.append({"role": "user", "content": request.message})
+        updated_history.append({"role": "assistant", "content": chat_resp.answer})
+
+        if redis_client:
+            try:
+                redis_client.setex(redis_key, 86400, json.dumps(updated_history))
+            except Exception as e:
+                logger.error(f"Error writing to Redis: {e}")
+
         mapped_sources = []
         for src in chat_resp.sources:
             url = "https://mcc.nic.in" if "neet" in src.lower() else "https://josaa.nic.in"
@@ -230,6 +304,43 @@ def chat_query(request: ChatQueryRequest) -> ChatQueryResponse:
         logger.error(f"Error in chat_query handler: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error during RAG retrieval.")
 
+
+
+@app.get("/v1/colleges/search", response_model=List[Dict[str, Any]])
+def search_colleges(exam_type: str, query: Optional[str] = None, q: Optional[str] = None) -> List[Dict[str, Any]]:
+    """Search for colleges eligible under the given exam_type."""
+    from .optimizer import EXAM_ELIGIBLE_COLLEGE_TYPES, get_college_type
+    
+    colleges_list = [
+        {"college_code": "IIT_BOMBAY", "name": "IIT Bombay", "type": "IIT"},
+        {"college_code": "IIT_DELHI", "name": "IIT Delhi", "type": "IIT"},
+        {"college_code": "IIT_MADRAS", "name": "IIT Madras", "type": "IIT"},
+        {"college_code": "NIT_TRICHY", "name": "NIT Tiruchirappalli", "type": "NIT"},
+        {"college_code": "NIT_SURATHKAL", "name": "NIT Surathkal", "type": "NIT"},
+        {"college_code": "IIIT_ALLAHABAD", "name": "IIIT Allahabad", "type": "IIIT"},
+        {"college_code": "IIIT_DELHI", "name": "IIIT Delhi", "type": "IIIT"},
+        {"college_code": "COEP_PUNE", "name": "COEP Pune", "type": "STATE"},
+        {"college_code": "VJTI_MUMBAI", "name": "VJTI Mumbai", "type": "STATE"},
+        {"college_code": "ICT_MUMBAI", "name": "ICT Mumbai", "type": "STATE"},
+        {"college_code": "AIIMS_DELHI", "name": "AIIMS Delhi", "type": "AIIMS"},
+        {"college_code": "MAMC_DELHI", "name": "MAMC Delhi", "type": "STATE"},
+        {"college_code": "RVCE_BANGALORE", "name": "RVCE Bangalore", "type": "PRIVATE"},
+        {"college_code": "BMSCE_BANGALORE", "name": "BMSCE Bangalore", "type": "STATE"},
+        {"college_code": "PESU_BANGALORE", "name": "PES University Bangalore", "type": "PRIVATE"},
+        {"college_code": "DY_PATIL_PUNE", "name": "Dr. D. Y. Patil Medical College", "type": "PRIVATE"}
+    ]
+    
+    exam_upper = exam_type.upper()
+    allowed_types = EXAM_ELIGIBLE_COLLEGE_TYPES.get(exam_upper, [])
+    search_term = q or query
+    
+    results = []
+    for c in colleges_list:
+        c_type = c["type"]
+        if c_type.upper() in [t.upper() for t in allowed_types]:
+            if not search_term or search_term.lower() in c["name"].lower() or search_term.lower() in c["college_code"].lower():
+                results.append(c)
+    return results
 
 @app.get("/v1/counsel/rules/{exam}", response_model=List[str])
 def get_rules(exam: str) -> List[str]:

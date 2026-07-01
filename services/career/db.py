@@ -1,5 +1,6 @@
 import logging
 from typing import Generator
+from contextlib import contextmanager
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker, Session
 from neo4j import GraphDatabase, Driver, Session as Neo4jSession
@@ -58,6 +59,7 @@ def close_neo4j_driver() -> None:
         _neo4j_driver = None
         logger.info("Closed Neo4j driver connection.")
 
+@contextmanager
 def get_neo4j_session() -> Generator[Neo4jSession, None, None]:
     driver = get_neo4j_driver()
     session = driver.session()

@@ -78,6 +78,9 @@ def extract_user_from_token(token: str) -> tuple[int | None, str]:
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
+        if request.url.path == "/health" or request.url.path.endswith("/health"):
+            return await call_next(request)
+
         auth_header = request.headers.get("Authorization")
         user_id, token_tier = None, "FREE"
         

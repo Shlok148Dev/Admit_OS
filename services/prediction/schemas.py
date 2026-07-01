@@ -91,6 +91,7 @@ class CollegePredictionResponse(BaseModel):
     """Response payload schema for college prediction."""
     predictions: List[CollegePrediction]
     metadata: PredictionMetadata
+    low_probability_warning: Optional[str] = None
 
 class SMEReviewQueueItem(BaseModel):
     """Response payload schema for SME Review Queue items."""

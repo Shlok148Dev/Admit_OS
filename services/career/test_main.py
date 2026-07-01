@@ -76,7 +76,7 @@ def test_find_scholarships_by_state(db_session):
 def test_get_branch_endpoint(mock_get_sess):
     mock_session = MagicMock()
     mock_session.__enter__.return_value = mock_session
-    mock_get_sess.return_value = iter([mock_session])
+    mock_get_sess.return_value = mock_session
     mock_node = {
         "code": "CS",
         "name": "Computer Science"
@@ -98,7 +98,7 @@ def test_get_branch_endpoint(mock_get_sess):
 def test_compare_branches_endpoint(mock_get_sess):
     mock_session = MagicMock()
     mock_session.__enter__.return_value = mock_session
-    mock_get_sess.return_value = iter([mock_session])
+    mock_get_sess.return_value = mock_session
     mock_node_cs = {"code": "CS", "name": "Computer Science"}
     mock_node_ec = {"code": "EC", "name": "Electronics"}
     mock_res_cs = MagicMock()
@@ -118,7 +118,7 @@ def test_compare_branches_endpoint(mock_get_sess):
 def test_career_paths_endpoint(mock_get_sess):
     mock_session = MagicMock()
     mock_session.__enter__.return_value = mock_session
-    mock_get_sess.return_value = iter([mock_session])
+    mock_get_sess.return_value = mock_session
     mock_node = {"code": "CS", "name": "Computer Science"}
     mock_res = MagicMock()
     mock_res.single.return_value = {"b": mock_node}

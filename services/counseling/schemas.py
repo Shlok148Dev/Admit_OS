@@ -53,6 +53,7 @@ class ChoiceOutput(CandidateCollege):
     final_score: float
     explanation: str
     choice_number: Optional[int] = None
+    label: Optional[str] = None
 
 class OptimizeChoicesRequest(BaseModel):
     session_id: str
@@ -72,6 +73,7 @@ class ChoiceItemOutput(BaseModel):
     nirf_rank: Optional[int] = None
     quota: str
     reason: str
+    label: Optional[str] = None
 
 class OptimizeChoicesResponse(BaseModel):
     optimized_choices: List[ChoiceItemOutput]
@@ -83,6 +85,7 @@ class OptimizeChoicesResponse(BaseModel):
     exam_has_upgrade_rounds: Optional[bool] = None
     exam_key_rule: Optional[str] = None
     all_reach_warning: Optional[str] = None
+    colleges_filtered_from: Optional[int] = None
 
 class WhatIfRequest(BaseModel):
     session_id: str
@@ -123,6 +126,8 @@ class ChatResponse(BaseModel):
     confidence: str = Field(..., description="HIGH, MEDIUM, LOW, DECLINED")
     sources: List[str]
     warning: Optional[str] = Field(None, description="Time-sensitive or verification warning")
+    is_fallback: Optional[bool] = None
+    declined: Optional[bool] = None
 
 class ChatQueryRequest(BaseModel):
     message: str

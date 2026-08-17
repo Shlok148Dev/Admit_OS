@@ -83,6 +83,7 @@ def test_redis_history_chat_flow(mock_redis):
             "history": [],
             "exam_type": "JEE_MAIN",
             "student_context": {
+                "user_id": 1,
                 "rank": 5000,
                 "category": "GENERAL",
                 "home_state": "MH",

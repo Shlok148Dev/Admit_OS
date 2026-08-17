@@ -40,6 +40,42 @@ class ToolExecutionResult:
     output: Any
     sources: list[str] = field(default_factory=list)
 
+
+def _detect_query_style(query: str) -> str:
+    """Classify the user's counseling query into a query style."""
+    q_lower = query.lower()
+    if any(g in q_lower for g in ["hi", "hello", "hey", "how are you"]) and len(query.split()) <= 6:
+        return "GREETING"
+    if any(k in q_lower for k in ["cutoff", "cut-off", "chances", "closing rank", "admission chance"]):
+        return "CUTOFF_CHANCES"
+    if any(k in q_lower for k in ["float", "freeze", "slide", "saf", "paf", "refund", "rules", "withdrawal"]):
+        return "RULES_QA"
+    if any(k in q_lower for k in ["better", "compare", "vs", "versus", "between"]):
+        return "COMPARISON"
+    return "GENERAL"
+
+
+def _build_system_prompt(
+    exam_type: str = "JEE_MAIN",
+    student_context: Optional[dict[str, Any]] = None,
+    retrieved: Optional[list[Any]] = None,
+    query_style: str = "GENERAL",
+) -> str:
+    """Construct formatted system prompt for senior AI admissions counselor."""
+    ctx = student_context or {}
+    rank_val = ctx.get("rank", "N/A")
+    cat_val = ctx.get("category", "GENERAL")
+    hs_val = ctx.get("home_state", "N/A")
+    return (
+        f"You are the official senior AI admissions counselor for {exam_type}.\n"
+        f"Detected Query Style: {query_style}\n"
+        f"Student Context:\n"
+        f"- Rank: {rank_val}\n"
+        f"- Category: {cat_val}\n"
+        f"- Home State: {hs_val}\n"
+    )
+
+
 PIPELINE_BUDGET_SECONDS = 35.0
 
 EXAM_CANDIDATE_COUNTS: dict[str, int] = {

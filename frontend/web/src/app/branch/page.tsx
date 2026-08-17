@@ -21,13 +21,23 @@ export default function BranchCompassPage() {
   const [branch2, setBranch2] = useState("EC");
 
   // Query comparison data
-  const { data: comparisonData, isLoading } = useQuery({
+  const { data: comparisonData, isLoading, error } = useQuery({
     queryKey: ["compare-branches", branch1, branch2],
     queryFn: () => compareBranches(branch1, branch2),
+    retry: false,
   });
 
-  const b1 = comparisonData?.b1Stats || BRANCH_STATS_MOCK[branch1];
-  const b2 = comparisonData?.b2Stats || BRANCH_STATS_MOCK[branch2];
+  if (error) {
+    return (
+      <div className="p-8 text-center max-w-xl mx-auto my-12 bg-red-50 border border-red-200 rounded-2xl space-y-4">
+        <h2 className="text-lg font-bold text-red-800">Branch Comparison Service Offline</h2>
+        <p className="text-sm text-red-600">The career database comparison service is currently unavailable. Please verify with official documentation.</p>
+      </div>
+    );
+  }
+
+  const b1 = comparisonData?.b1Stats;
+  const b2 = comparisonData?.b2Stats;
   const insight = comparisonData?.insight || "Select branches to compare their career packages, NIRF ratings, and placement percentages.";
 
   return (

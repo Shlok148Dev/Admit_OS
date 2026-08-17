@@ -14,13 +14,18 @@ os.environ["DATABASE_URL"] = "sqlite:///./test_prediction_lifecycle.db"
 os.environ["MLFLOW_TRACKING_URI"] = "sqlite:///test_mlflow.db"
 os.environ["MLFLOW_EXPERIMENT_NAME"] = "test_cutoff_prediction"
 
-from services.prediction.database import init_db, SessionLocal, Base, engine, PredictionLog
+from services.prediction.database import (
+    init_db,
+    Base,
+    engine,
+)
 from services.prediction.main import app, predictors, load_production_models
 from services.prediction.training.train_per_exam import (
-    calculate_metrics, main as run_training
+    calculate_metrics,
+    main as run_training,
 )
 from services.prediction.training.mlflow_lifecycle import (
-    get_latest_candidate_version, main as run_lifecycle
+    get_latest_candidate_version,
 )
 
 
@@ -73,6 +78,7 @@ def test_training_and_lifecycle_integration() -> None:
 
     import mlflow
     from mlflow.tracking import MlflowClient
+
     mlflow.set_tracking_uri("sqlite:///test_mlflow.db")
     client = MlflowClient()
 
@@ -102,12 +108,18 @@ def test_prediction_logging_and_503_gating() -> None:
 
     client = TestClient(app)
     payload = {
-        "exam": "JEE_MAIN", "rank": 1200, "percentile": None,
-        "category": "GENERAL", "home_state": "MH", "gender": "M",
-        "year": 2025
+        "exam": "JEE_MAIN",
+        "rank": 1200,
+        "percentile": None,
+        "category": "GENERAL",
+        "home_state": "MH",
+        "gender": "M",
+        "year": 2025,
     }
     response = client.post("/v1/predict/college", json=payload)
-    assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
+    assert (
+        response.status_code == 200
+    ), f"Expected 200, got {response.status_code}: {response.text}"
 
     # Verify the response contains valid prediction data
     data = response.json()
@@ -120,13 +132,16 @@ def test_prediction_logging_and_503_gating() -> None:
         del predictors["NEET"]
 
     payload_neet = {
-        "exam": "NEET", "rank": 200, "percentile": None,
-        "category": "GENERAL", "home_state": "DL", "gender": "M",
-        "year": 2025
+        "exam": "NEET",
+        "rank": 200,
+        "percentile": None,
+        "category": "GENERAL",
+        "home_state": "DL",
+        "gender": "M",
+        "year": 2025,
     }
     response_neet = client.post("/v1/predict/college", json=payload_neet)
     # With graceful fallback, NEET should also return 200 using CutoffPredictor
-    assert response_neet.status_code == 200, (
-        f"Expected 200 with fallback, got {response_neet.status_code}: {response_neet.text}"
-    )
-
+    assert (
+        response_neet.status_code == 200
+    ), f"Expected 200 with fallback, got {response_neet.status_code}: {response_neet.text}"

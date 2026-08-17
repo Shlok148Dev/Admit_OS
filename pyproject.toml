@@ -7,3 +7,15 @@ filterwarnings = [
     "ignore::DeprecationWarning",
     "ignore::PendingDeprecationWarning",
 ]
+
+[tool.ruff]
+exclude = [
+    "Foresight.ai",
+]
+ignore = [
+    "E402",  # Module level import not at top of file (needed for test env setup)
+    "E741",  # Ambiguous variable name (e.g. 'l' for log)
+    "F401",  # Unused import (often used for conditional import checks)
+    "F841",  # Local variable assigned but never used
+    "E712",  # Comparison to True (used in SQLAlchemy filters)
+]

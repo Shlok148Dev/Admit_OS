@@ -6,10 +6,9 @@ Ensures columns are normalised correctly.
 
 from __future__ import annotations
 
-import json
 import logging
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 import pdfplumber
 
 logger = logging.getLogger("pdf_extractor")
@@ -106,11 +105,10 @@ class PDFExtractor:
         records: List[Dict[str, Any]] = []
         try:
             import camelot  # type: ignore[import]
+
             tables = camelot.read_pdf(pdf_path, pages="all", flavor="lattice")
             if not tables or len(tables) == 0:
-                tables = camelot.read_pdf(
-                    pdf_path, pages="all", flavor="stream"
-                )
+                tables = camelot.read_pdf(pdf_path, pages="all", flavor="stream")
             for t in tables:
                 df = t.df
                 if df.empty or len(df) < 2:
@@ -174,9 +172,7 @@ class PDFExtractor:
         logger.info(f"Extracting PDF: {pdf_path}")
         res = self.extract_with_pdfplumber(pdf_path)
         if res:
-            logger.info(
-                f"Successfully extracted {len(res)} rows via pdfplumber"
-            )
+            logger.info(f"Successfully extracted {len(res)} rows via pdfplumber")
             return res
 
         res = self.extract_with_camelot(pdf_path)

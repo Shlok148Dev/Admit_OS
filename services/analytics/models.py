@@ -3,11 +3,23 @@ Database models for the analytics microservice.
 """
 
 from datetime import datetime
-from sqlalchemy import Column, Integer, SmallInteger, String, Boolean, DateTime, Float, Text, UniqueConstraint, CheckConstraint
+from sqlalchemy import (
+    Column,
+    Integer,
+    SmallInteger,
+    String,
+    Boolean,
+    DateTime,
+    Float,
+    Text,
+    CheckConstraint,
+)
 from services.analytics.db import Base
+
 
 class OutcomeSubmission(Base):
     """Table to collect actual seat allotment outcomes from students."""
+
     __tablename__ = "outcome_submissions"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -30,12 +42,14 @@ class OutcomeSubmission(Base):
     __table_args__ = (
         CheckConstraint(
             "data_confidence IN ('HIGH', 'MEDIUM', 'LOW')",
-            name="chk_submission_confidence"
+            name="chk_submission_confidence",
         ),
     )
 
+
 class AccuracyMetric(Base):
     """Table to store calculated public accuracy statistics."""
+
     __tablename__ = "accuracy_metrics"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -45,12 +59,17 @@ class AccuracyMetric(Base):
     accuracy_within_500 = Column(Float, nullable=False)
     accuracy_within_1000 = Column(Float, nullable=False)
     total_evaluated = Column(Integer, nullable=False)
-    updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = Column(
+        DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow
+    )
+
 
 # Mapping prediction tables in analytics service (since they reside in the same DB)
 
+
 class PredictionLog(Base):
     """Table to log prediction queries and results for monitoring and shadow testing."""
+
     __tablename__ = "prediction_logs"
     __table_args__ = {"extend_existing": True}
 
@@ -68,8 +87,10 @@ class PredictionLog(Base):
     actual_rank = Column(Integer, nullable=True)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
 
+
 class SMEReviewQueue(Base):
     """SME Review Queue table model for low-confidence or anomalous cutoffs."""
+
     __tablename__ = "sme_review_queue"
     __table_args__ = {"extend_existing": True}
 
@@ -91,10 +112,14 @@ class SMEReviewQueue(Base):
     resolved = Column(Boolean, default=False)
     reviewer_id = Column(Integer, nullable=True)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
-    updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = Column(
+        DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow
+    )
+
 
 class ExamCutoff(Base):
     """Exam cutoff table model."""
+
     __tablename__ = "exam_cutoffs"
     __table_args__ = {"extend_existing": True}
 
@@ -117,4 +142,6 @@ class ExamCutoff(Base):
     sme_verified = Column(Boolean, default=False)
     sme_reviewer_id = Column(Integer, nullable=True)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
-    updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = Column(
+        DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow
+    )

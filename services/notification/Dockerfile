@@ -1,21 +1,19 @@
-FROM python:3.11-slim
-
+# Multi-stage production Dockerfile for Notification Service
+FROM python:3.11-slim as builder
 WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends gcc libpq-dev && rm -rf /var/lib/apt/lists/*
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+COPY pyproject.toml .
+RUN pip install --no-cache-dir fastapi uvicorn[standard] psycopg2-binary pydantic pydantic-settings pyjwt
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy service code. Since we run the service as a package services.notification,
-# we copy the source code to the services/notification subdirectory inside /app
-COPY . /app/services/notification
-
-EXPOSE 8000
-
+FROM python:3.11-slim as runner
+WORKDIR /app
+RUN groupadd -g 10001 appgroup && useradd -u 10001 -g appgroup -s /bin/sh appuser
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 ENV PYTHONPATH=/app
-CMD ["uvicorn", "services.notification.main:app", "--host", "0.0.0.0", "--port", "8000"]
+COPY services/notification /app/services/notification
+USER appuser
+EXPOSE 8003
+CMD ["uvicorn", "services.notification.main:app", "--host", "0.0.0.0", "--port", "8003"]

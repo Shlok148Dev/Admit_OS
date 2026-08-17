@@ -6,6 +6,7 @@ from services.career.models import Scholarship
 
 logger = logging.getLogger("career_service.seed")
 
+
 def load_seed_data() -> dict:
     try:
         with open("services/career/seed_data.json", "r", encoding="utf-8") as f:
@@ -14,26 +15,30 @@ def load_seed_data() -> dict:
         with open("seed_data.json", "r", encoding="utf-8") as f:
             return json.load(f)
 
+
 def seed_sql_scholarships(db: Session, scholarships: list) -> None:
     if db.query(Scholarship).count() > 0:
         return
     for item in scholarships:
-        db.add(Scholarship(
-            name=item["name"],
-            provider=item["provider"],
-            description=item["description"],
-            amount=item["amount"],
-            eligibility_criteria=item.get("eligibility_criteria"),
-            eligible_categories=item.get("eligible_categories"),
-            eligible_states=item.get("eligible_states"),
-            eligible_genders=item.get("eligible_genders"),
-            max_family_income=item.get("max_family_income"),
-            min_academic_score=item.get("min_academic_score"),
-            source_url=item["source_url"],
-            data_confidence=item.get("data_confidence", "HIGH")
-        ))
+        db.add(
+            Scholarship(
+                name=item["name"],
+                provider=item["provider"],
+                description=item["description"],
+                amount=item["amount"],
+                eligibility_criteria=item.get("eligibility_criteria"),
+                eligible_categories=item.get("eligible_categories"),
+                eligible_states=item.get("eligible_states"),
+                eligible_genders=item.get("eligible_genders"),
+                max_family_income=item.get("max_family_income"),
+                min_academic_score=item.get("min_academic_score"),
+                source_url=item["source_url"],
+                data_confidence=item.get("data_confidence", "HIGH"),
+            )
+        )
     db.commit()
     logger.info("Seeded scholarships to PostgreSQL.")
+
 
 def create_branch_node(session: Neo4jSession, branch: dict) -> None:
     session.run(
@@ -54,14 +59,15 @@ def create_branch_node(session: Neo4jSession, branch: dict) -> None:
         nit_rate=branch["nit_placement_rate"],
         nit_salary=branch["nit_median_salary"],
         salary_range=branch["salary_range"],
-        transition_options=branch["transition_options"]
+        transition_options=branch["transition_options"],
     )
+
 
 def create_job_role_and_rel(session: Neo4jSession, branch_code: str, job: dict) -> None:
     session.run(
         "MERGE (j:JobRole {title: $title}) SET j.domain = $domain",
         title=job["title"],
-        domain=job["domain"]
+        domain=job["domain"],
     )
     session.run(
         """
@@ -72,10 +78,13 @@ def create_job_role_and_rel(session: Neo4jSession, branch_code: str, job: dict) 
         """,
         branch_code=branch_code,
         title=job["title"],
-        percentage=job["percentage"]
+        percentage=job["percentage"],
     )
 
-def create_salary_band_and_rel(session: Neo4jSession, job_title: str, job: dict) -> None:
+
+def create_salary_band_and_rel(
+    session: Neo4jSession, job_title: str, job: dict
+) -> None:
     session.run(
         """
         MATCH (j:JobRole {title: $title})
@@ -85,10 +94,13 @@ def create_salary_band_and_rel(session: Neo4jSession, job_title: str, job: dict)
         title=job_title,
         min=job["min_salary"],
         max=job["max_salary"],
-        median=job["median_salary"]
+        median=job["median_salary"],
     )
 
-def create_companies_and_rels(session: Neo4jSession, job_title: str, companies: list) -> None:
+
+def create_companies_and_rels(
+    session: Neo4jSession, job_title: str, companies: list
+) -> None:
     for comp in companies:
         session.run(
             """
@@ -97,8 +109,9 @@ def create_companies_and_rels(session: Neo4jSession, job_title: str, companies: 
             MERGE (c)-[:HIRES_FOR]->(j)
             """,
             title=job_title,
-            comp=comp
+            comp=comp,
         )
+
 
 def create_skills_and_rels(session: Neo4jSession, job_title: str, skills: list) -> None:
     for skill in skills:
@@ -109,8 +122,9 @@ def create_skills_and_rels(session: Neo4jSession, job_title: str, skills: list) 
             MERGE (j)-[:REQUIRES_SKILL {importance: 4}]->(sk)
             """,
             title=job_title,
-            skill=skill
+            skill=skill,
         )
+
 
 def seed_neo4j_branches(session: Neo4jSession, branches: list) -> None:
     session.run("MATCH (n) DETACH DELETE n")
@@ -124,7 +138,7 @@ def seed_neo4j_branches(session: Neo4jSession, branches: list) -> None:
                 MERGE (b)-[:REQUIRES_CORE_SKILL]->(sk)
                 """,
                 code=br["code"],
-                skill=skill
+                skill=skill,
             )
         for pg in br["pg_feeds"]:
             session.run(
@@ -134,7 +148,7 @@ def seed_neo4j_branches(session: Neo4jSession, branches: list) -> None:
                 MERGE (b)-[:FEEDS_INTO_PG]->(p)
                 """,
                 code=br["code"],
-                pg=pg
+                pg=pg,
             )
         for job in br["jobs"]:
             create_job_role_and_rel(session, br["code"], job)
@@ -142,6 +156,7 @@ def seed_neo4j_branches(session: Neo4jSession, branches: list) -> None:
             create_companies_and_rels(session, job["title"], job["companies"])
             create_skills_and_rels(session, job["title"], job["skills"])
     logger.info("Seeded Neo4j branch graph database.")
+
 
 def seed_all(db: Session, neo4j_sess: Neo4jSession) -> None:
     data = load_seed_data()

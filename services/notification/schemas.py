@@ -1,12 +1,14 @@
 from datetime import datetime
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, Optional
 from pydantic import BaseModel, Field
+
 
 class PreferenceUpdate(BaseModel):
     channels: Dict[str, bool] = Field(
         ...,
-        description="Dictionary mapping channels (PUSH, EMAIL, SMS, WHATSAPP) to their enabled state."
+        description="Dictionary mapping channels (PUSH, EMAIL, SMS, WHATSAPP) to their enabled state.",
     )
+
 
 class PreferenceResponse(BaseModel):
     user_id: int
@@ -16,11 +18,13 @@ class PreferenceResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 class SubscribeRequest(BaseModel):
     exam_type: Optional[str] = None
     college_code: Optional[str] = None
     device_token: Optional[str] = None
     platform: Optional[str] = None
+
 
 class SubscribeResponse(BaseModel):
     message: str
@@ -42,6 +46,7 @@ class NotificationFeedItem(BaseModel):
     class Config:
         from_attributes = True
 
+
 class UpcomingEventResponse(BaseModel):
     id: int
     event_name: str
@@ -54,6 +59,7 @@ class UpcomingEventResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
 
 class MessageResponse(BaseModel):
     message: str

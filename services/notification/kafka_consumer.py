@@ -55,26 +55,36 @@ class GroundTruthConsumer:
         year = data.get("year")
         round_num = data.get("round")
 
-        sub_users = db.query(NotificationSubscription.user_id).filter(
-            NotificationSubscription.exam_type == exam
-        ).all()
-        prof_users = db.query(StudentProfile.user_id).filter(
-            StudentProfile.primary_exam == exam
-        ).all()
+        sub_users = (
+            db.query(NotificationSubscription.user_id)
+            .filter(NotificationSubscription.exam_type == exam)
+            .all()
+        )
+        prof_users = (
+            db.query(StudentProfile.user_id)
+            .filter(StudentProfile.primary_exam == exam)
+            .all()
+        )
         user_ids = {u.user_id for u in sub_users} | {u.user_id for u in prof_users}
 
         if not user_ids:
             logger.info("No registered users found for exam %s.", exam)
             return
 
-        tpl = db.query(NotificationTemplate).filter(
-            NotificationTemplate.template_key == "new_data_available"
-        ).first()
+        tpl = (
+            db.query(NotificationTemplate)
+            .filter(NotificationTemplate.template_key == "new_data_available")
+            .first()
+        )
         if not tpl:
             logger.error("Template 'new_data_available' not found.")
             return
 
-        vars_dict = {"exam_type": exam, "year": str(year), "round_number": str(round_num)}
+        vars_dict = {
+            "exam_type": exam,
+            "year": str(year),
+            "round_number": str(round_num),
+        }
         push_users = []
         for uid in user_ids:
             pid = self._create_user_notification(db, uid, tpl, exam, vars_dict)
@@ -94,9 +104,11 @@ class GroundTruthConsumer:
         variables: Dict[str, str],
     ) -> Optional[int]:
         """Creates a NotificationLog entry and returns user_id if channel is PUSH."""
-        prefs = db.query(NotificationPreference).filter(
-            NotificationPreference.user_id == user_id
-        ).first()
+        prefs = (
+            db.query(NotificationPreference)
+            .filter(NotificationPreference.user_id == user_id)
+            .first()
+        )
         if prefs and not prefs.channels.get(template.channel, True):
             return None
 
@@ -134,9 +146,11 @@ class GroundTruthConsumer:
         title = render_text(template.title_template, variables)
         body = render_text(template.body_template, variables)
 
-        tokens = db.query(DeviceToken).filter(
-            DeviceToken.user_id.in_(user_ids), DeviceToken.is_active == True
-        ).all()
+        tokens = (
+            db.query(DeviceToken)
+            .filter(DeviceToken.user_id.in_(user_ids), DeviceToken.is_active == True)
+            .all()
+        )
 
         fcm_t = [t.token for t in tokens if t.platform != "ios"]
         apns_t = [t.token for t in tokens if t.platform == "ios"]
@@ -172,7 +186,9 @@ def _get_kafka_consumer(stop_event: Optional[Any]) -> Optional[Any]:
     return None
 
 
-def _run_consumer_loop(consumer: Any, processor: GroundTruthConsumer, stop_event: Optional[Any]) -> None:
+def _run_consumer_loop(
+    consumer: Any, processor: GroundTruthConsumer, stop_event: Optional[Any]
+) -> None:
     """Executes the polling loop for the consumer."""
     try:
         from confluent_kafka import KafkaError

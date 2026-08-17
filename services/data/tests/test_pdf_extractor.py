@@ -1,8 +1,6 @@
-"""Unit tests for PDFExtractor column normalization and adaptive extraction fallbacks.
-"""
+"""Unit tests for PDFExtractor column normalization and adaptive extraction fallbacks."""
 
 from unittest.mock import MagicMock, patch
-import pytest
 
 from services.data.extractors.pdf_extractor import (
     PDFExtractor,

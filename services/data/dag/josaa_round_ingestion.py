@@ -18,7 +18,6 @@ Technical Bible Section 5.2 reference implementation.
 from __future__ import annotations
 
 import hashlib
-import io
 import json
 import logging
 import os
@@ -39,7 +38,14 @@ logger = logging.getLogger("josaa_round_ingestion")
 # Helpers
 # ---------------------------------------------------------------------------
 
-def _log(task_id: str, step: str, status: str, msg: str, extra: Optional[Dict[str, Any]] = None) -> None:
+
+def _log(
+    task_id: str,
+    step: str,
+    status: str,
+    msg: str,
+    extra: Optional[Dict[str, Any]] = None,
+) -> None:
     """Structured JSON log — no PII ever included per DPDP Act 2023."""
     payload: Dict[str, Any] = {
         "logger": "josaa_round_ingestion",
@@ -66,6 +72,7 @@ def _raw_dir(year: int, round_n: int) -> pathlib.Path:
 def _db_conn() -> Any:
     """Return a psycopg2 connection.  DATABASE_URL injected by Helm secret."""
     import psycopg2
+
     url = os.environ["DATABASE_URL"]
     return psycopg2.connect(url)
 
@@ -112,12 +119,18 @@ def download_from_official_portal_task(**kwargs: Any) -> Dict[str, Any]:
         dict with keys 'year_paths' (dict[int, Path]) and 'portal_reachable' (bool).
     """
     task_id = "download_from_official_portal"
-    _log(task_id, "download", "START", "Beginning download of JoSAA official allotment files.")
+    _log(
+        task_id,
+        "download",
+        "START",
+        "Beginning download of JoSAA official allotment files.",
+    )
 
     try:
         import requests
     except ImportError:
         import subprocess
+
         subprocess.check_call(["pip", "install", "requests", "-q"])
         import requests  # type: ignore[no-redef]
 
@@ -133,20 +146,35 @@ def download_from_official_portal_task(**kwargs: Any) -> Dict[str, Any]:
         pdf_local = raw_dir / f"josaa_{year}_round{ROUND}_allotment.pdf"
 
         if csv_local.exists():
-            _log(task_id, "download", "CACHE_HIT", f"Using cached CSV {year}", {"path": str(csv_local)})
+            _log(
+                task_id,
+                "download",
+                "CACHE_HIT",
+                f"Using cached CSV {year}",
+                {"path": str(csv_local)},
+            )
             year_paths[year] = str(csv_local)
             continue
 
         downloaded = False
         for file_type, url in urls.items():
             try:
-                resp = requests.get(url, timeout=30, headers={"User-Agent": "ADMIT-OS/1.0 data-pipeline"})
+                resp = requests.get(
+                    url,
+                    timeout=30,
+                    headers={"User-Agent": "ADMIT-OS/1.0 data-pipeline"},
+                )
                 if resp.status_code == 200 and len(resp.content) > 10_000:
                     local_path = csv_local if file_type == "csv" else pdf_local
                     local_path.write_bytes(resp.content)
                     chk = _sha256(resp.content)
-                    _log(task_id, "download", "SUCCESS", f"Downloaded {file_type} for {year}",
-                         {"url": url, "sha256": chk, "size_bytes": len(resp.content)})
+                    _log(
+                        task_id,
+                        "download",
+                        "SUCCESS",
+                        f"Downloaded {file_type} for {year}",
+                        {"url": url, "sha256": chk, "size_bytes": len(resp.content)},
+                    )
                     year_paths[year] = str(local_path)
                     downloaded = True
                     break
@@ -156,14 +184,34 @@ def download_from_official_portal_task(**kwargs: Any) -> Dict[str, Any]:
 
         if not downloaded:
             # ── Fallback: use local mock CSV bundled with repo ──────────
-            mock_path = pathlib.Path(__file__).parent.parent / "tests" / "fixtures" / f"josaa_{year}_mock.csv"
+            mock_path = (
+                pathlib.Path(__file__).parent.parent
+                / "tests"
+                / "fixtures"
+                / f"josaa_{year}_mock.csv"
+            )
             if mock_path.exists():
                 year_paths[year] = str(mock_path)
-                _log(task_id, "download", "FALLBACK", f"Using bundled mock for {year}", {"path": str(mock_path)})
+                _log(
+                    task_id,
+                    "download",
+                    "FALLBACK",
+                    f"Using bundled mock for {year}",
+                    {"path": str(mock_path)},
+                )
             else:
-                _log(task_id, "download", "SKIP", f"No source for {year} — pipeline will generate synthetic.")
+                _log(
+                    task_id,
+                    "download",
+                    "SKIP",
+                    f"No source for {year} — pipeline will generate synthetic.",
+                )
 
-    result = {"year_paths": year_paths, "portal_reachable": portal_reachable, "round": ROUND}
+    result = {
+        "year_paths": year_paths,
+        "portal_reachable": portal_reachable,
+        "round": ROUND,
+    }
     _log(task_id, "download", "DONE", f"Downloaded {len(year_paths)} years", result)
     return result
 
@@ -173,25 +221,43 @@ def download_from_official_portal_task(**kwargs: Any) -> Dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 EXPECTED_COLUMNS = [
-    "college_code", "college_name", "branch_code", "branch_name",
-    "category", "sub_category", "quota", "gender",
-    "opening_rank", "closing_rank", "year", "round_number",
+    "college_code",
+    "college_name",
+    "branch_code",
+    "branch_name",
+    "category",
+    "sub_category",
+    "quota",
+    "gender",
+    "opening_rank",
+    "closing_rank",
+    "year",
+    "round_number",
 ]
 
 
 def _parse_csv_file(path: str, year: int) -> List[Dict[str, Any]]:
     """Parse a JoSAA-format CSV into list of dicts."""
     import csv
+
     records = []
     with open(path, newline="", encoding="utf-8-sig") as fh:
         reader = csv.DictReader(fh)
         for row in reader:
             # Normalise column names (JoSAA CSV headers vary by year)
             rec: Dict[str, Any] = {
-                "college_code": row.get("Inst Code", row.get("Institute Code", "")).strip(),
-                "college_name": row.get("Institute", row.get("College Name", "")).strip(),
-                "branch_code": row.get("Br Code", row.get("Branch Code", row.get("Program Code", ""))).strip(),
-                "branch_name": row.get("Program Name", row.get("Branch Name", "")).strip(),
+                "college_code": row.get(
+                    "Inst Code", row.get("Institute Code", "")
+                ).strip(),
+                "college_name": row.get(
+                    "Institute", row.get("College Name", "")
+                ).strip(),
+                "branch_code": row.get(
+                    "Br Code", row.get("Branch Code", row.get("Program Code", ""))
+                ).strip(),
+                "branch_name": row.get(
+                    "Program Name", row.get("Branch Name", "")
+                ).strip(),
                 "category": row.get("Quota", row.get("Category", "OPEN")).strip(),
                 "sub_category": row.get("Seat Type", "NONE").strip(),
                 "quota": row.get("Allotted Quota", row.get("Quota", "OS")).strip(),
@@ -210,6 +276,7 @@ def _parse_pdf_file(path: str, year: int) -> List[Dict[str, Any]]:
     records = []
     try:
         import pdfplumber
+
         with pdfplumber.open(path) as pdf:
             for page in pdf.pages:
                 table = page.extract_table()
@@ -219,7 +286,10 @@ def _parse_pdf_file(path: str, year: int) -> List[Dict[str, Any]]:
                 for row in table[1:]:
                     if not row or all(cell is None for cell in row):
                         continue
-                    row_dict = {h: (str(row[i]).strip() if i < len(row) else "") for i, h in enumerate(headers)}
+                    row_dict = {
+                        h: (str(row[i]).strip() if i < len(row) else "")
+                        for i, h in enumerate(headers)
+                    }
                     rec: Dict[str, Any] = {
                         "college_code": row_dict.get("Inst Code", ""),
                         "college_name": row_dict.get("Institute", ""),
@@ -229,16 +299,28 @@ def _parse_pdf_file(path: str, year: int) -> List[Dict[str, Any]]:
                         "sub_category": row_dict.get("Seat Type", "NONE"),
                         "quota": row_dict.get("Allotted Quota", "OS"),
                         "gender": row_dict.get("Gender", "Gender-Neutral"),
-                        "opening_rank": re.sub(r"[^0-9]", "", row_dict.get("Opening Rank", "0")) or "0",
-                        "closing_rank": re.sub(r"[^0-9]", "", row_dict.get("Closing Rank", "0")) or "0",
+                        "opening_rank": re.sub(
+                            r"[^0-9]", "", row_dict.get("Opening Rank", "0")
+                        )
+                        or "0",
+                        "closing_rank": re.sub(
+                            r"[^0-9]", "", row_dict.get("Closing Rank", "0")
+                        )
+                        or "0",
                         "year": year,
                         "round_number": ROUND,
                     }
                     records.append(rec)
     except Exception as exc:
-        _log("extract_pdf_tables", "parse", "WARN", f"pdfplumber failed for {path}: {exc} — trying camelot")
+        _log(
+            "extract_pdf_tables",
+            "parse",
+            "WARN",
+            f"pdfplumber failed for {path}: {exc} — trying camelot",
+        )
         try:
             import camelot  # type: ignore[import]
+
             tables = camelot.read_pdf(path, pages="all", flavor="lattice")
             for t in tables:
                 df = t.df
@@ -254,8 +336,14 @@ def _parse_pdf_file(path: str, year: int) -> List[Dict[str, Any]]:
                         "sub_category": str(row.get("Seat Type", "NONE")),
                         "quota": str(row.get("Allotted Quota", "OS")),
                         "gender": str(row.get("Gender", "Gender-Neutral")),
-                        "opening_rank": re.sub(r"[^0-9]", "", str(row.get("Opening Rank", "0"))) or "0",
-                        "closing_rank": re.sub(r"[^0-9]", "", str(row.get("Closing Rank", "0"))) or "0",
+                        "opening_rank": re.sub(
+                            r"[^0-9]", "", str(row.get("Opening Rank", "0"))
+                        )
+                        or "0",
+                        "closing_rank": re.sub(
+                            r"[^0-9]", "", str(row.get("Closing Rank", "0"))
+                        )
+                        or "0",
                         "year": year,
                         "round_number": ROUND,
                     }
@@ -269,10 +357,14 @@ def extract_pdf_tables_task(**kwargs: Any) -> Dict[str, Any]:
     """Task 2: Extract rank tables from downloaded PDFs/CSVs."""
     task_id = "extract_pdf_tables"
     ti = kwargs["ti"]
-    download_result: Dict[str, Any] = ti.xcom_pull(task_ids="download_from_official_portal")
+    download_result: Dict[str, Any] = ti.xcom_pull(
+        task_ids="download_from_official_portal"
+    )
     year_paths: Dict[str, str] = download_result.get("year_paths", {})
 
-    _log(task_id, "extract", "START", f"Extracting tables from {len(year_paths)} files.")
+    _log(
+        task_id, "extract", "START", f"Extracting tables from {len(year_paths)} files."
+    )
 
     extracted_json_path = tempfile.mktemp(suffix=".json", prefix="josaa_extracted_")
     all_records: List[Dict[str, Any]] = []
@@ -285,8 +377,13 @@ def extract_pdf_tables_task(**kwargs: Any) -> Dict[str, Any]:
             else:
                 recs = _parse_pdf_file(path, year)
             all_records.extend(recs)
-            _log(task_id, "extract", "OK", f"Extracted {len(recs)} records for {year}",
-                 {"path": path, "year": year})
+            _log(
+                task_id,
+                "extract",
+                "OK",
+                f"Extracted {len(recs)} records for {year}",
+                {"path": path, "year": year},
+            )
         except Exception as exc:
             _log(task_id, "extract", "ERROR", f"Failed on {path}: {exc}")
 
@@ -294,13 +391,20 @@ def extract_pdf_tables_task(**kwargs: Any) -> Dict[str, Any]:
         json.dump(all_records, fh)
 
     result = {"json_path": extracted_json_path, "total_raw_records": len(all_records)}
-    _log(task_id, "extract", "DONE", f"Extraction complete: {len(all_records)} records.", result)
+    _log(
+        task_id,
+        "extract",
+        "DONE",
+        f"Extraction complete: {len(all_records)} records.",
+        result,
+    )
     return result
 
 
 # ---------------------------------------------------------------------------
 # Task 3 — Validate schema using Great Expectations
 # ---------------------------------------------------------------------------
+
 
 def _int_positive(val: Any) -> bool:
     try:
@@ -333,8 +437,18 @@ def validate_schema_task(**kwargs: Any) -> Dict[str, Any]:
 
     if not records:
         # No live data downloaded — seed will be handled by seed_josaa.py separately
-        _log(task_id, "validate", "SKIP", "No extracted records; passing through to seed fallback.")
-        return {"status": "VALIDATED_EMPTY", "valid_count": 0, "failed_count": 0, "failure_rate": 0.0}
+        _log(
+            task_id,
+            "validate",
+            "SKIP",
+            "No extracted records; passing through to seed fallback.",
+        )
+        return {
+            "status": "VALIDATED_EMPTY",
+            "valid_count": 0,
+            "failed_count": 0,
+            "failure_rate": 0.0,
+        }
 
     valid, failed = [], []
     for rec in records:
@@ -363,9 +477,13 @@ def validate_schema_task(**kwargs: Any) -> Dict[str, Any]:
             valid.append(rec)
 
     failure_rate = len(failed) / len(records) if records else 0.0
-    _log(task_id, "validate", "RESULT",
-         f"Valid: {len(valid)}, Failed: {len(failed)}, Rate: {failure_rate:.2%}",
-         {"failure_rate": failure_rate})
+    _log(
+        task_id,
+        "validate",
+        "RESULT",
+        f"Valid: {len(valid)}, Failed: {len(failed)}, Rate: {failure_rate:.2%}",
+        {"failure_rate": failure_rate},
+    )
 
     if failure_rate > 0.05:
         raise ValueError(
@@ -394,16 +512,56 @@ def validate_schema_task(**kwargs: Any) -> Dict[str, Any]:
 
 # Known reference values for spot-checks (from official JoSAA PDFs)
 REFERENCE_SPOT_CHECKS: List[Dict[str, Any]] = [
-    {"college_code": "NIT_TRICHY", "branch_code": "4109", "category": "OPEN",
-     "quota": "OS", "gender": "Gender-Neutral", "year": 2024, "expected_closing": 1224, "tolerance": 50},
-    {"college_code": "NIT_WARANGAL", "branch_code": "5129", "category": "OBC-NCL",
-     "quota": "OS", "gender": "Gender-Neutral", "year": 2024, "expected_closing": 622, "tolerance": 50},
-    {"college_code": "NIT_SURATHKAL", "branch_code": "2164", "category": "OPEN",
-     "quota": "OS", "gender": "Gender-Neutral", "year": 2024, "expected_closing": 2724, "tolerance": 100},
-    {"college_code": "IIIT_ALLAHABAD", "branch_code": "E148", "category": "OPEN",
-     "quota": "OS", "gender": "Gender-Neutral", "year": 2024, "expected_closing": 5602, "tolerance": 200},
-    {"college_code": "NIT_TRICHY", "branch_code": "4110", "category": "OPEN",
-     "quota": "OS", "gender": "Gender-Neutral", "year": 2024, "expected_closing": 3546, "tolerance": 150},
+    {
+        "college_code": "NIT_TRICHY",
+        "branch_code": "4109",
+        "category": "OPEN",
+        "quota": "OS",
+        "gender": "Gender-Neutral",
+        "year": 2024,
+        "expected_closing": 1224,
+        "tolerance": 50,
+    },
+    {
+        "college_code": "NIT_WARANGAL",
+        "branch_code": "5129",
+        "category": "OBC-NCL",
+        "quota": "OS",
+        "gender": "Gender-Neutral",
+        "year": 2024,
+        "expected_closing": 622,
+        "tolerance": 50,
+    },
+    {
+        "college_code": "NIT_SURATHKAL",
+        "branch_code": "2164",
+        "category": "OPEN",
+        "quota": "OS",
+        "gender": "Gender-Neutral",
+        "year": 2024,
+        "expected_closing": 2724,
+        "tolerance": 100,
+    },
+    {
+        "college_code": "IIIT_ALLAHABAD",
+        "branch_code": "E148",
+        "category": "OPEN",
+        "quota": "OS",
+        "gender": "Gender-Neutral",
+        "year": 2024,
+        "expected_closing": 5602,
+        "tolerance": 200,
+    },
+    {
+        "college_code": "NIT_TRICHY",
+        "branch_code": "4110",
+        "category": "OPEN",
+        "quota": "OS",
+        "gender": "Gender-Neutral",
+        "year": 2024,
+        "expected_closing": 3546,
+        "tolerance": 150,
+    },
 ]
 
 
@@ -422,10 +580,17 @@ def cross_validate_3_sources_task(**kwargs: Any) -> Dict[str, Any]:
     status = validate_result.get("status", "")
 
     if status == "VALIDATED_EMPTY" or not json_path:
-        _log(task_id, "cross_validate", "SKIP", "No records to cross-validate; skipping.")
+        _log(
+            task_id, "cross_validate", "SKIP", "No records to cross-validate; skipping."
+        )
         return {"status": "CROSS_VALIDATED_EMPTY"}
 
-    _log(task_id, "cross_validate", "START", "Beginning cross-validation against reference data.")
+    _log(
+        task_id,
+        "cross_validate",
+        "START",
+        "Beginning cross-validation against reference data.",
+    )
 
     with open(json_path) as fh:
         records: List[Dict[str, Any]] = json.load(fh)
@@ -433,16 +598,28 @@ def cross_validate_3_sources_task(**kwargs: Any) -> Dict[str, Any]:
     # Index records by (college_code, branch_code, category, quota, gender, year)
     index: Dict[Tuple, Dict[str, Any]] = {}
     for r in records:
-        key = (r["college_code"], r["branch_code"], r["category"],
-               r["quota"], r["gender"], int(r["year"]))
+        key = (
+            r["college_code"],
+            r["branch_code"],
+            r["category"],
+            r["quota"],
+            r["gender"],
+            int(r["year"]),
+        )
         index[key] = r
 
     flagged = []
     matched = 0
 
     for check in REFERENCE_SPOT_CHECKS:
-        key = (check["college_code"], check["branch_code"], check["category"],
-               check["quota"], check["gender"], check["year"])
+        key = (
+            check["college_code"],
+            check["branch_code"],
+            check["category"],
+            check["quota"],
+            check["gender"],
+            check["year"],
+        )
         rec = index.get(key)
         if rec is None:
             continue
@@ -453,15 +630,22 @@ def cross_validate_3_sources_task(**kwargs: Any) -> Dict[str, Any]:
             matched += 1
         else:
             rec["data_confidence"] = "LOW"
-            flagged.append({
-                "key": key,
-                "extracted": extracted,
-                "expected": check["expected_closing"],
-                "diff": diff,
-                "tolerance": check["tolerance"],
-            })
-            _log(task_id, "cross_validate", "WARN",
-                 f"Flagged discrepancy: {key} diff={diff}", {"flagged": flagged[-1]})
+            flagged.append(
+                {
+                    "key": key,
+                    "extracted": extracted,
+                    "expected": check["expected_closing"],
+                    "diff": diff,
+                    "tolerance": check["tolerance"],
+                }
+            )
+            _log(
+                task_id,
+                "cross_validate",
+                "WARN",
+                f"Flagged discrepancy: {key} diff={diff}",
+                {"flagged": flagged[-1]},
+            )
 
     # Default all un-checked records to MEDIUM
     for r in records:
@@ -533,10 +717,16 @@ def load_to_postgres_task(**kwargs: Any) -> Dict[str, Any]:
     status = cross_result.get("status", "")
 
     if status in ("CROSS_VALIDATED_EMPTY",) or not json_path:
-        _log(task_id, "load_db", "SKIP", "No records to load; running seed script instead.")
+        _log(
+            task_id,
+            "load_db",
+            "SKIP",
+            "No records to load; running seed script instead.",
+        )
         # Trigger seed_josaa.py as fallback
         try:
             from services.data.seed_josaa import seed as seed_fn  # type: ignore[import]
+
             n = seed_fn()
             _log(task_id, "load_db", "SEEDED", f"Seed script populated {n} rows.")
             return {"rows_upserted": n, "method": "seed_fallback"}
@@ -552,29 +742,38 @@ def load_to_postgres_task(**kwargs: Any) -> Dict[str, Any]:
     rows = []
     for r in records:
         try:
-            rows.append({
-                "college_code": str(r["college_code"])[:20],
-                "college_name": str(r["college_name"])[:255],
-                "branch_code": str(r["branch_code"])[:20],
-                "branch_name": str(r["branch_name"])[:255],
-                "category": str(r["category"])[:50],
-                "sub_category": str(r.get("sub_category", "NONE"))[:50],
-                "quota": str(r["quota"])[:10],
-                "gender": str(r["gender"])[:50],
-                "opening_rank": int(r["opening_rank"]),
-                "closing_rank": int(r["closing_rank"]),
-                "year": int(r["year"]),
-                "round_number": int(r.get("round_number", ROUND)),
-                "exam_type": "JEE_MAIN",
-                "data_confidence": r.get("data_confidence", "MEDIUM"),
-                "source_url": r.get("source_url", "")[:2048],
-            })
+            rows.append(
+                {
+                    "college_code": str(r["college_code"])[:20],
+                    "college_name": str(r["college_name"])[:255],
+                    "branch_code": str(r["branch_code"])[:20],
+                    "branch_name": str(r["branch_name"])[:255],
+                    "category": str(r["category"])[:50],
+                    "sub_category": str(r.get("sub_category", "NONE"))[:50],
+                    "quota": str(r["quota"])[:10],
+                    "gender": str(r["gender"])[:50],
+                    "opening_rank": int(r["opening_rank"]),
+                    "closing_rank": int(r["closing_rank"]),
+                    "year": int(r["year"]),
+                    "round_number": int(r.get("round_number", ROUND)),
+                    "exam_type": "JEE_MAIN",
+                    "data_confidence": r.get("data_confidence", "MEDIUM"),
+                    "source_url": r.get("source_url", "")[:2048],
+                }
+            )
         except Exception as exc:
-            _log(task_id, "load_db", "WARN", f"Skipping malformed record: {exc}", {"record": str(r)[:200]})
+            _log(
+                task_id,
+                "load_db",
+                "WARN",
+                f"Skipping malformed record: {exc}",
+                {"record": str(r)[:200]},
+            )
 
     conn = _db_conn()
     try:
         from psycopg2.extras import execute_batch
+
         with conn.cursor() as cur:
             execute_batch(cur, UPSERT_SQL, rows, page_size=500)
         conn.commit()
@@ -592,6 +791,7 @@ def load_to_postgres_task(**kwargs: Any) -> Dict[str, Any]:
 # ---------------------------------------------------------------------------
 # Task 6 — Compute lag features and write Parquet
 # ---------------------------------------------------------------------------
+
 
 def update_feature_store_task(**kwargs: Any) -> Dict[str, Any]:
     """Task 6: Compute lag features, rolling stats, and write to Parquet for ML.
@@ -619,6 +819,7 @@ def update_feature_store_task(**kwargs: Any) -> Dict[str, Any]:
 
     try:
         import pandas as pd
+
         conn = _db_conn()
         df = pd.read_sql_query(FEATURE_SQL, conn)
         conn.close()
@@ -626,20 +827,36 @@ def update_feature_store_task(**kwargs: Any) -> Dict[str, Any]:
         _log(task_id, "feature_store", "ERROR", f"Could not fetch data: {exc}")
         return {"status": "FEATURE_STORE_SKIPPED", "reason": str(exc)}
 
-    group_cols = ["college_code", "branch_code", "category", "sub_category", "quota", "gender"]
+    group_cols = [
+        "college_code",
+        "branch_code",
+        "category",
+        "sub_category",
+        "quota",
+        "gender",
+    ]
     df = df.sort_values(group_cols + ["year"])
 
     def add_group_features(grp: Any) -> Any:
         grp = grp.sort_values("year").copy()
         for lag in range(1, 6):
             grp[f"lag_{lag}"] = grp["closing_rank"].shift(lag)
-        grp["rolling_mean_3"] = grp["closing_rank"].rolling(window=3, min_periods=1).mean()
-        grp["rolling_mean_5"] = grp["closing_rank"].rolling(window=5, min_periods=1).mean()
-        grp["rolling_std_3"] = grp["closing_rank"].rolling(window=3, min_periods=1).std()
-        grp["rolling_std_5"] = grp["closing_rank"].rolling(window=5, min_periods=1).std()
+        grp["rolling_mean_3"] = (
+            grp["closing_rank"].rolling(window=3, min_periods=1).mean()
+        )
+        grp["rolling_mean_5"] = (
+            grp["closing_rank"].rolling(window=5, min_periods=1).mean()
+        )
+        grp["rolling_std_3"] = (
+            grp["closing_rank"].rolling(window=3, min_periods=1).std()
+        )
+        grp["rolling_std_5"] = (
+            grp["closing_rank"].rolling(window=5, min_periods=1).std()
+        )
         # Trend: linear slope using least-squares
         if len(grp) >= 2:
             import numpy as np
+
             x = grp["year"].values
             y = grp["closing_rank"].values
             slope = float(np.polyfit(x - x.mean(), y, 1)[0])
@@ -662,13 +879,20 @@ def update_feature_store_task(**kwargs: Any) -> Dict[str, Any]:
         "feature_rows": len(df_feat),
         "rows_upserted": load_result.get("rows_upserted", 0),
     }
-    _log(task_id, "feature_store", "DONE", f"Feature parquet written: {out_file} ({len(df_feat)} rows).", result)
+    _log(
+        task_id,
+        "feature_store",
+        "DONE",
+        f"Feature parquet written: {out_file} ({len(df_feat)} rows).",
+        result,
+    )
     return result
 
 
 # ---------------------------------------------------------------------------
 # Task 7 — Trigger model retrain
 # ---------------------------------------------------------------------------
+
 
 def trigger_model_retrain_task(**kwargs: Any) -> Dict[str, Any]:
     """Task 7: POST to prediction-service /internal/retrain to kick off ML retrain.
@@ -683,12 +907,14 @@ def trigger_model_retrain_task(**kwargs: Any) -> Dict[str, Any]:
     _log(task_id, "retrain", "START", "Triggering prediction model retraining.")
 
     prediction_svc_url = os.getenv(
-        "PREDICTION_SERVICE_URL", "http://prediction-service.admitos.svc.cluster.local:8001"
+        "PREDICTION_SERVICE_URL",
+        "http://prediction-service.admitos.svc.cluster.local:8001",
     )
     retrain_endpoint = f"{prediction_svc_url}/internal/retrain"
 
     try:
         import requests
+
         payload = {
             "parquet_path": feature_result.get("parquet_path", ""),
             "feature_rows": feature_result.get("feature_rows", 0),
@@ -698,13 +924,25 @@ def trigger_model_retrain_task(**kwargs: Any) -> Dict[str, Any]:
         resp = requests.post(retrain_endpoint, json=payload, timeout=120)
         resp.raise_for_status()
         run_id: str = resp.json().get("run_id", "unknown")
-        _log(task_id, "retrain", "SUCCESS", "Retraining triggered via HTTP.", {"run_id": run_id})
+        _log(
+            task_id,
+            "retrain",
+            "SUCCESS",
+            "Retraining triggered via HTTP.",
+            {"run_id": run_id},
+        )
         return {"status": "TRIGGERED", "run_id": run_id, "method": "http"}
     except Exception as exc:
-        _log(task_id, "retrain", "WARN", f"HTTP trigger failed ({exc}); falling back to direct retrain.")
+        _log(
+            task_id,
+            "retrain",
+            "WARN",
+            f"HTTP trigger failed ({exc}); falling back to direct retrain.",
+        )
         try:
             import pandas as pd
             from services.prediction.model import CutoffPredictor, generate_synthetic_cutoffs  # type: ignore[import]
+
             parquet_path = feature_result.get("parquet_path")
             if parquet_path and pathlib.Path(parquet_path).exists():
                 df = pd.read_parquet(parquet_path)
@@ -712,9 +950,20 @@ def trigger_model_retrain_task(**kwargs: Any) -> Dict[str, Any]:
                 df = generate_synthetic_cutoffs()
             predictor = CutoffPredictor()
             mape, mae = predictor.train(df)
-            _log(task_id, "retrain", "SUCCESS", "Direct retrain complete.",
-                 {"mape": mape, "mae": mae, "method": "direct"})
-            return {"status": "TRIGGERED", "run_id": "direct_retrain", "mape": mape, "mae": mae, "method": "direct"}
+            _log(
+                task_id,
+                "retrain",
+                "SUCCESS",
+                "Direct retrain complete.",
+                {"mape": mape, "mae": mae, "method": "direct"},
+            )
+            return {
+                "status": "TRIGGERED",
+                "run_id": "direct_retrain",
+                "mape": mape,
+                "mae": mae,
+                "method": "direct",
+            }
         except Exception as exc2:
             _log(task_id, "retrain", "ERROR", f"Direct retrain also failed: {exc2}")
             return {"status": "RETRAIN_FAILED", "error": str(exc2)}
@@ -723,6 +972,7 @@ def trigger_model_retrain_task(**kwargs: Any) -> Dict[str, Any]:
 # ---------------------------------------------------------------------------
 # Task 8 — Publish Kafka event (data.validated.ground_truth)
 # ---------------------------------------------------------------------------
+
 
 def publish_data_validated_event_task(**kwargs: Any) -> Dict[str, Any]:
     """Task 8: Publish ValidatedGroundTruth Avro event to Kafka.
@@ -735,10 +985,19 @@ def publish_data_validated_event_task(**kwargs: Any) -> Dict[str, Any]:
     ti = kwargs["ti"]
     retrain_result: Dict[str, Any] = ti.xcom_pull(task_ids="trigger_model_retrain")
 
-    _log(task_id, "kafka_publish", "START", "Publishing ValidatedGroundTruth event to Kafka.")
+    _log(
+        task_id,
+        "kafka_publish",
+        "START",
+        "Publishing ValidatedGroundTruth event to Kafka.",
+    )
 
-    kafka_broker = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka.admitos.svc.cluster.local:9092")
-    schema_registry_url = os.getenv("SCHEMA_REGISTRY_URL", "http://schema-registry.admitos.svc.cluster.local:8081")
+    kafka_broker = os.getenv(
+        "KAFKA_BOOTSTRAP_SERVERS", "kafka.admitos.svc.cluster.local:9092"
+    )
+    schema_registry_url = os.getenv(
+        "SCHEMA_REGISTRY_URL", "http://schema-registry.admitos.svc.cluster.local:8081"
+    )
     topic = "data.validated.ground_truth"
 
     event_payload: Dict[str, Any] = {
@@ -760,20 +1019,33 @@ def publish_data_validated_event_task(**kwargs: Any) -> Dict[str, Any]:
         from confluent_kafka.schema_registry.avro import AvroSerializer  # type: ignore[import]
         from confluent_kafka.serialization import SerializationContext, MessageField  # type: ignore[import]
 
-        schema_path = pathlib.Path(__file__).parent.parent.parent / "infra" / "kafka" / "schemas" / "data_validated_ground_truth.avsc"
-        avro_schema = schema_path.read_text() if schema_path.exists() else json.dumps({
-            "type": "record", "name": "ValidatedGroundTruth",
-            "fields": [
-                {"name": "event_type", "type": "string"},
-                {"name": "event_id", "type": "string"},
-                {"name": "exam_type", "type": "string"},
-                {"name": "round_number", "type": "int"},
-                {"name": "timestamp", "type": "string"},
-                {"name": "model_run_id", "type": "string"},
-                {"name": "source", "type": "string"},
-                {"name": "data_confidence", "type": "string"},
-            ]
-        })
+        schema_path = (
+            pathlib.Path(__file__).parent.parent.parent
+            / "infra"
+            / "kafka"
+            / "schemas"
+            / "data_validated_ground_truth.avsc"
+        )
+        avro_schema = (
+            schema_path.read_text()
+            if schema_path.exists()
+            else json.dumps(
+                {
+                    "type": "record",
+                    "name": "ValidatedGroundTruth",
+                    "fields": [
+                        {"name": "event_type", "type": "string"},
+                        {"name": "event_id", "type": "string"},
+                        {"name": "exam_type", "type": "string"},
+                        {"name": "round_number", "type": "int"},
+                        {"name": "timestamp", "type": "string"},
+                        {"name": "model_run_id", "type": "string"},
+                        {"name": "source", "type": "string"},
+                        {"name": "data_confidence", "type": "string"},
+                    ],
+                }
+            )
+        )
 
         registry_client = SchemaRegistryClient({"url": schema_registry_url})
         serializer = AvroSerializer(registry_client, avro_schema)
@@ -783,23 +1055,38 @@ def publish_data_validated_event_task(**kwargs: Any) -> Dict[str, Any]:
             if err:
                 _log(task_id, "kafka_publish", "ERROR", f"Delivery failed: {err}")
             else:
-                _log(task_id, "kafka_publish", "DELIVERED",
-                     f"Message delivered to {msg.topic()} [{msg.partition()}]")
+                _log(
+                    task_id,
+                    "kafka_publish",
+                    "DELIVERED",
+                    f"Message delivered to {msg.topic()} [{msg.partition()}]",
+                )
 
         producer.produce(
             topic=topic,
-            value=serializer(event_payload, SerializationContext(topic, MessageField.VALUE)),
+            value=serializer(
+                event_payload, SerializationContext(topic, MessageField.VALUE)
+            ),
             on_delivery=delivery_report,
         )
         producer.flush(timeout=30)
 
-        result = {"status": "PUBLISHED", "topic": topic, "event_id": event_payload["event_id"], "method": "kafka"}
+        result = {
+            "status": "PUBLISHED",
+            "topic": topic,
+            "event_id": event_payload["event_id"],
+            "method": "kafka",
+        }
         _log(task_id, "kafka_publish", "SUCCESS", "Event published to Kafka.", result)
         return result
 
     except Exception as exc:
-        _log(task_id, "kafka_publish", "WARN",
-             f"Kafka unavailable ({exc}); logging event for replay.")
+        _log(
+            task_id,
+            "kafka_publish",
+            "WARN",
+            f"Kafka unavailable ({exc}); logging event for replay.",
+        )
         replay_dir = pathlib.Path(os.getenv("KAFKA_REPLAY_DIR", "/data/kafka_replay"))
         replay_dir.mkdir(parents=True, exist_ok=True)
         replay_file = replay_dir / f"{event_payload['event_id']}.json"
@@ -818,6 +1105,7 @@ def publish_data_validated_event_task(**kwargs: Any) -> Dict[str, Any]:
 # Task 9 — Notify users via notification service
 # ---------------------------------------------------------------------------
 
+
 def send_notification_to_users_task(**kwargs: Any) -> Dict[str, Any]:
     """Task 9: POST to notification service to queue user alerts for new cutoffs.
 
@@ -825,12 +1113,17 @@ def send_notification_to_users_task(**kwargs: Any) -> Dict[str, Any]:
     """
     task_id = "send_notification_to_users"
     ti = kwargs["ti"]
-    publish_result: Dict[str, Any] = ti.xcom_pull(task_ids="publish_data_validated_event")
+    publish_result: Dict[str, Any] = ti.xcom_pull(
+        task_ids="publish_data_validated_event"
+    )
 
-    _log(task_id, "notify", "START", "Triggering user notifications for new JoSAA data.")
+    _log(
+        task_id, "notify", "START", "Triggering user notifications for new JoSAA data."
+    )
 
     notification_svc_url = os.getenv(
-        "NOTIFICATION_SERVICE_URL", "http://notification-service.admitos.svc.cluster.local:8003"
+        "NOTIFICATION_SERVICE_URL",
+        "http://notification-service.admitos.svc.cluster.local:8003",
     )
     endpoint = f"{notification_svc_url}/internal/trigger"
 
@@ -849,15 +1142,26 @@ def send_notification_to_users_task(**kwargs: Any) -> Dict[str, Any]:
 
     try:
         import requests
+
         resp = requests.post(endpoint, json=payload, timeout=30)
         resp.raise_for_status()
         queued = resp.json().get("queued_count", 0)
         result = {"status": "NOTIFIED", "queued_count": queued, "method": "http"}
-        _log(task_id, "notify", "SUCCESS", f"Notification queued for {queued} users.", result)
+        _log(
+            task_id,
+            "notify",
+            "SUCCESS",
+            f"Notification queued for {queued} users.",
+            result,
+        )
         return result
     except Exception as exc:
-        _log(task_id, "notify", "WARN",
-             f"Notification service unreachable ({exc}); event logged for deferred send.")
+        _log(
+            task_id,
+            "notify",
+            "WARN",
+            f"Notification service unreachable ({exc}); event logged for deferred send.",
+        )
         return {"status": "NOTIFY_DEFERRED", "error": str(exc)}
 
 
@@ -882,7 +1186,7 @@ with DAG(
         "Orchestrates JoSAA counseling round ingestion: download → extract → validate → "
         "cross-validate → PostgreSQL → feature store → retrain → Kafka → notifications"
     ),
-    schedule_interval=None,            # Triggered manually each JoSAA round
+    schedule_interval=None,  # Triggered manually each JoSAA round
     start_date=datetime(2026, 6, 1),
     catchup=False,
     tags=["ingestion", "josaa", "ground_truth", "production"],

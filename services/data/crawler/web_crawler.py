@@ -35,6 +35,7 @@ def _get_redis_client() -> Optional[Any]:
     """Return a Redis client or None if unavailable."""
     try:
         import redis  # type: ignore[import]
+
         redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
         client = redis.from_url(redis_url, decode_responses=True, socket_timeout=2)
         client.ping()
@@ -59,6 +60,7 @@ class WebCrawlerAgent:
         """Fetch page content using httpx with retries."""
         try:
             import httpx  # type: ignore[import]
+
             with httpx.Client(timeout=15.0, follow_redirects=True) as client:
                 resp = client.get(url, headers={"User-Agent": "AdmitOS-Crawler/1.0"})
                 resp.raise_for_status()
@@ -101,6 +103,7 @@ class WebCrawlerAgent:
         """Publish event to Kafka topic (stub logs to INFO when Kafka unavailable)."""
         try:
             from kafka import KafkaProducer  # type: ignore[import]
+
             brokers = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
             producer = KafkaProducer(
                 bootstrap_servers=brokers,
@@ -110,7 +113,9 @@ class WebCrawlerAgent:
             producer.flush()
             logger.info(f"Published to Kafka topic {topic}: {message['document_hash']}")
         except Exception as e:
-            logger.info(f"Kafka stub publish to {topic}: {json.dumps(message)} (error: {e})")
+            logger.info(
+                f"Kafka stub publish to {topic}: {json.dumps(message)} (error: {e})"
+            )
 
     def check_and_process_page(
         self, url: str, exam_type: str, previous_hash: Optional[str] = None

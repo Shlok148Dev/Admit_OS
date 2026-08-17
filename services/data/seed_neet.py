@@ -27,6 +27,7 @@ DATABASE_URL: str = os.getenv(
     "DATABASE_URL", "postgresql://admitos:admitos@localhost:5432/admitos"
 )
 
+
 def get_db_connection() -> Any:
     """Connect to database based on protocol (sqlite or postgres)."""
     if DATABASE_URL.startswith("sqlite"):
@@ -36,17 +37,17 @@ def get_db_connection() -> Any:
     else:
         return psycopg2.connect(DATABASE_URL)
 
+
 def generate_neet_data() -> list[tuple[Any, ...]]:
     """
     Generate NEET cutoffs for MCC counseling (2020-2024).
     Minimum 20,000 rows.
     """
     logger.info("Generating NEET dataset combinations...")
-    
+
     # 55 medical colleges
     colleges = [
-        (f"MC_{i:02d}", f"Government Medical College {i:02d}")
-        for i in range(1, 56)
+        (f"MC_{i:02d}", f"Government Medical College {i:02d}") for i in range(1, 56)
     ]
     # AIIMS Delhi is MC_01 for custom ranks
     colleges[0] = ("AIIMS_DELHI", "All India Institute of Medical Sciences New Delhi")
@@ -54,8 +55,10 @@ def generate_neet_data() -> list[tuple[Any, ...]]:
     colleges[2] = ("VMMC_DELHI", "Vardhman Mahavir Medical College New Delhi")
 
     # 2 Branches
-    branches = [("MBBS", "Bachelor of Medicine and Bachelor of Surgery"), 
-                ("BDS", "Bachelor of Dental Surgery")]
+    branches = [
+        ("MBBS", "Bachelor of Medicine and Bachelor of Surgery"),
+        ("BDS", "Bachelor of Dental Surgery"),
+    ]
 
     # 5 Categories
     categories = ["GENERAL", "OBC", "SC", "ST", "EWS"]
@@ -93,7 +96,7 @@ def generate_neet_data() -> list[tuple[Any, ...]]:
                     "EWS": 1.25,
                     "OBC": 1.35,
                     "SC": 5.0,
-                    "ST": 7.5
+                    "ST": 7.5,
                 }[cat]
 
                 for quota in quotas:
@@ -108,7 +111,14 @@ def generate_neet_data() -> list[tuple[Any, ...]]:
                             round_mult = {1: 0.85, 2: 1.0, 3: 1.2, 4: 1.35}[round_num]
 
                             # Calculate deterministic ranks
-                            closing_rank = int(base_rank * br_mult * cat_mult * quota_mult * year_mult * round_mult)
+                            closing_rank = int(
+                                base_rank
+                                * br_mult
+                                * cat_mult
+                                * quota_mult
+                                * year_mult
+                                * round_mult
+                            )
                             opening_rank = int(closing_rank * 0.78)
 
                             # Total seats and allotted seats per combination
@@ -119,30 +129,33 @@ def generate_neet_data() -> list[tuple[Any, ...]]:
 
                             source_url = f"https://mcc.nic.in/neetug/round{round_num}/cutoff_{year}.pdf"
 
-                            rows.append((
-                                "NEET",             # exam_type
-                                "MCC",              # counseling_body
-                                year,               # year
-                                round_num,          # round_number
-                                col_code,           # college_code
-                                br_code,            # branch_code
-                                cat,                # category
-                                quota,              # quota
-                                opening_rank,       # opening_rank
-                                closing_rank,       # closing_rank
-                                total_seats,        # total_seats
-                                allotted_seats,     # allotted_seats
-                                "HIGH",             # data_confidence
-                                source_url,         # source_url
-                                "hash_neet_mock_val",# source_document_hash
-                                True,               # sme_verified
-                                None,               # sme_reviewer_id
-                                now,                # created_at
-                                now                 # updated_at
-                            ))
+                            rows.append(
+                                (
+                                    "NEET",  # exam_type
+                                    "MCC",  # counseling_body
+                                    year,  # year
+                                    round_num,  # round_number
+                                    col_code,  # college_code
+                                    br_code,  # branch_code
+                                    cat,  # category
+                                    quota,  # quota
+                                    opening_rank,  # opening_rank
+                                    closing_rank,  # closing_rank
+                                    total_seats,  # total_seats
+                                    allotted_seats,  # allotted_seats
+                                    "HIGH",  # data_confidence
+                                    source_url,  # source_url
+                                    "hash_neet_mock_val",  # source_document_hash
+                                    True,  # sme_verified
+                                    None,  # sme_reviewer_id
+                                    now,  # created_at
+                                    now,  # updated_at
+                                )
+                            )
 
     logger.info("Generated %d rows of NEET cutoffs.", len(rows))
     return rows
+
 
 def seed(dry_run: bool = False) -> int:
     """Seed the NEET cutoffs data."""
@@ -155,7 +168,7 @@ def seed(dry_run: bool = False) -> int:
     try:
         is_sqlite = DATABASE_URL.startswith("sqlite")
         cursor = conn.cursor()
-        
+
         # Insert SQL using proper syntax for database type
         if is_sqlite:
             # SQLite parameter placeholder is ?
@@ -197,7 +210,7 @@ def seed(dry_run: bool = False) -> int:
                 updated_at = NOW()
             """
             execute_values(cursor, insert_sql, rows, page_size=1000)
-            
+
         conn.commit()
         logger.info("Successfully seeded %d NEET cutoff rows.", len(rows))
         return len(rows)
@@ -208,8 +221,10 @@ def seed(dry_run: bool = False) -> int:
     finally:
         conn.close()
 
+
 if __name__ == "__main__":
     import sys
+
     dry = "--dry-run" in sys.argv
     total = seed(dry_run=dry)
     logger.info("Seed complete. %d rows processed.", total)

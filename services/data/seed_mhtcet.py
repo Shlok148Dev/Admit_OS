@@ -27,6 +27,7 @@ DATABASE_URL: str = os.getenv(
     "DATABASE_URL", "postgresql://admitos:admitos@localhost:5432/admitos"
 )
 
+
 def get_db_connection() -> Any:
     """Connect to database based on protocol (sqlite or postgres)."""
     if DATABASE_URL.startswith("sqlite"):
@@ -36,13 +37,14 @@ def get_db_connection() -> Any:
     else:
         return psycopg2.connect(DATABASE_URL)
 
+
 def generate_mhtcet_data() -> list[tuple[Any, ...]]:
     """
     Generate MHT-CET cutoffs for DTE MH counseling (2021-2024).
     Minimum 15,000 rows.
     """
     logger.info("Generating MHT-CET dataset combinations...")
-    
+
     # 50 engineering colleges in Maharashtra
     colleges = [
         (f"MHC_{i:02d}", f"Maharashtra Engineering College {i:02d}")
@@ -54,9 +56,9 @@ def generate_mhtcet_data() -> list[tuple[Any, ...]]:
 
     # 3 Branches
     branches = [
-        ("CS", "Computer Science and Engineering"), 
+        ("CS", "Computer Science and Engineering"),
         ("EC", "Electronics and Telecommunication Engineering"),
-        ("ME", "Mechanical Engineering")
+        ("ME", "Mechanical Engineering"),
     ]
 
     # 7 Maharashtra Categories
@@ -99,7 +101,7 @@ def generate_mhtcet_data() -> list[tuple[Any, ...]]:
                     "LOBCS": 1.8,
                     "TFWS": 0.5,  # Tuition Fee Waiver is extremely competitive
                     "EWS": 1.2,
-                    "PWD": 5.0
+                    "PWD": 5.0,
                 }[cat]
 
                 for quota in quotas:
@@ -114,7 +116,14 @@ def generate_mhtcet_data() -> list[tuple[Any, ...]]:
                             round_mult = {1: 0.85, 2: 1.0, 3: 1.15}[round_num]
 
                             # Calculate deterministic ranks
-                            closing_rank = int(base_rank * br_mult * cat_mult * quota_mult * year_mult * round_mult)
+                            closing_rank = int(
+                                base_rank
+                                * br_mult
+                                * cat_mult
+                                * quota_mult
+                                * year_mult
+                                * round_mult
+                            )
                             opening_rank = int(closing_rank * 0.82)
 
                             total_seats = 20 if br_code == "CS" else 15
@@ -124,30 +133,33 @@ def generate_mhtcet_data() -> list[tuple[Any, ...]]:
 
                             source_url = f"https://fe2024.mahacet.org/StaticPages/HomePage?round={round_num}&year={year}"
 
-                            rows.append((
-                                "MHT_CET",          # exam_type
-                                "DTE_MH",           # counseling_body
-                                year,               # year
-                                round_num,          # round_number
-                                col_code,           # college_code
-                                br_code,            # branch_code
-                                cat,                # category
-                                quota,              # quota
-                                opening_rank,       # opening_rank
-                                closing_rank,       # closing_rank
-                                total_seats,        # total_seats
-                                allotted_seats,     # allotted_seats
-                                "HIGH",             # data_confidence
-                                source_url,         # source_url
-                                "hash_mhtcet_mock_val",# source_document_hash
-                                True,               # sme_verified
-                                None,               # sme_reviewer_id
-                                now,                # created_at
-                                now                 # updated_at
-                            ))
+                            rows.append(
+                                (
+                                    "MHT_CET",  # exam_type
+                                    "DTE_MH",  # counseling_body
+                                    year,  # year
+                                    round_num,  # round_number
+                                    col_code,  # college_code
+                                    br_code,  # branch_code
+                                    cat,  # category
+                                    quota,  # quota
+                                    opening_rank,  # opening_rank
+                                    closing_rank,  # closing_rank
+                                    total_seats,  # total_seats
+                                    allotted_seats,  # allotted_seats
+                                    "HIGH",  # data_confidence
+                                    source_url,  # source_url
+                                    "hash_mhtcet_mock_val",  # source_document_hash
+                                    True,  # sme_verified
+                                    None,  # sme_reviewer_id
+                                    now,  # created_at
+                                    now,  # updated_at
+                                )
+                            )
 
     logger.info("Generated %d rows of MHT-CET cutoffs.", len(rows))
     return rows
+
 
 def seed(dry_run: bool = False) -> int:
     """Seed the MHT-CET cutoffs data."""
@@ -160,7 +172,7 @@ def seed(dry_run: bool = False) -> int:
     try:
         is_sqlite = DATABASE_URL.startswith("sqlite")
         cursor = conn.cursor()
-        
+
         # Insert SQL using proper syntax for database type
         if is_sqlite:
             # SQLite parameter placeholder is ?
@@ -202,7 +214,7 @@ def seed(dry_run: bool = False) -> int:
                 updated_at = NOW()
             """
             execute_values(cursor, insert_sql, rows, page_size=1000)
-            
+
         conn.commit()
         logger.info("Successfully seeded %d MHT-CET cutoff rows.", len(rows))
         return len(rows)
@@ -213,8 +225,10 @@ def seed(dry_run: bool = False) -> int:
     finally:
         conn.close()
 
+
 if __name__ == "__main__":
     import sys
+
     dry = "--dry-run" in sys.argv
     total = seed(dry_run=dry)
     logger.info("Seed complete. %d rows processed.", total)

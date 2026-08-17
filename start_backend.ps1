@@ -1,11 +1,10 @@
 # start_backend.ps1
-# Set environment variables for all microservices
-$env:DATABASE_URL = "sqlite:///C:\Users\hp\Desktop\Nexus_Academics\admitos_prediction.db"
-$env:JWT_SECRET = "super-secret-access-key-12345"
-$env:JWT_REFRESH_SECRET = "super-secret-refresh-key-54321"
+# Load environment variables from .env or environment
 $env:ENVIRONMENT = "development"
 $env:REDIS_URL = "redis://localhost:6379/0" # Redis is optional, endpoints handle fallback
 $env:PYTHONPATH = "C:\Users\hp\Desktop\Nexus_Academics"
+$env:PYTHONUNBUFFERED = "1"
+
 
 # Load .env file if it exists
 if (Test-Path "C:\Users\hp\Desktop\Nexus_Academics\.env") {

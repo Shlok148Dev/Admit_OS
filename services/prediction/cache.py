@@ -15,14 +15,13 @@ REDIS_URL: Optional[str] = os.getenv("REDIS_URL", None)
 
 _redis_client: Optional[redis.Redis] = None
 
+
 def init_redis() -> None:
     global _redis_client
     try:
         if REDIS_URL:
             _redis_client = redis.Redis.from_url(
-                REDIS_URL,
-                decode_responses=True,
-                socket_connect_timeout=2
+                REDIS_URL, decode_responses=True, socket_connect_timeout=2
             )
         else:
             _redis_client = redis.Redis(
@@ -31,21 +30,21 @@ def init_redis() -> None:
                 db=REDIS_DB,
                 password=REDIS_PASSWORD,
                 decode_responses=True,
-                socket_connect_timeout=2
+                socket_connect_timeout=2,
             )
         # Test connection
         _redis_client.ping()
         logger.info("Connected to Redis successfully.")
     except Exception as e:
-        logger.warning(
-            f"Redis connection failed: {e}. Falling back to mock cache."
-        )
+        logger.warning(f"Redis connection failed: {e}. Falling back to mock cache.")
         _redis_client = None
+
 
 init_redis()
 
 # Mock in-memory cache for fallback
 _in_memory_cache: Dict[str, Dict[str, Any]] = {}
+
 
 def is_redis_healthy() -> bool:
     """Check if Redis connection is currently healthy."""
@@ -57,6 +56,7 @@ def is_redis_healthy() -> bool:
     except Exception:
         return False
 
+
 def get_redis_latency() -> float:
     """Measure Redis ping latency in milliseconds. Returns -1.0 if down."""
     if not _redis_client:
@@ -67,6 +67,7 @@ def get_redis_latency() -> float:
         return (time.time() - start) * 1000.0
     except Exception:
         return -1.0
+
 
 def get_cached_prediction(key: str) -> Optional[Dict[str, Any]]:
     """Get prediction from Redis or in-memory fallback (auto-unwrapped)."""
@@ -80,11 +81,12 @@ def get_cached_prediction(key: str) -> Optional[Dict[str, Any]]:
                 return res
         except Exception as e:
             logger.error(f"Redis get error: {e}", exc_info=True)
-            
+
     val = _in_memory_cache.get(key)
     if val and isinstance(val, dict) and "wrapped_response" in val:
         return val["wrapped_response"]
     return val
+
 
 def get_cached_wrapped(key: str) -> Optional[Dict[str, Any]]:
     """Get full wrapped cache item (including fresh_until and wrapped_response)."""
@@ -99,7 +101,7 @@ def get_cached_wrapped(key: str) -> Optional[Dict[str, Any]]:
                 return {"wrapped_response": res, "fresh_until": time.time() + 1800}
         except Exception as e:
             logger.error(f"Redis get error: {e}", exc_info=True)
-            
+
     val = _in_memory_cache.get(key)
     if val and isinstance(val, dict) and "wrapped_response" in val:
         return val
@@ -107,12 +109,10 @@ def get_cached_wrapped(key: str) -> Optional[Dict[str, Any]]:
         return {"wrapped_response": val, "fresh_until": time.time() + 1800}
     return None
 
+
 def set_cached_prediction(key: str, value: Dict[str, Any], ttl: int = 1800) -> None:
     """Set prediction to Redis or in-memory fallback with wrapping."""
-    wrapped = {
-        "wrapped_response": value,
-        "fresh_until": time.time() + ttl
-    }
+    wrapped = {"wrapped_response": value, "fresh_until": time.time() + ttl}
     if _redis_client:
         try:
             # We set actual cache expiration in Redis to 24 hours (86400s)
@@ -120,5 +120,5 @@ def set_cached_prediction(key: str, value: Dict[str, Any], ttl: int = 1800) -> N
             return
         except Exception as e:
             logger.error(f"Redis set error: {e}", exc_info=True)
-            
+
     _in_memory_cache[key] = wrapped

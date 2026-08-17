@@ -15,19 +15,23 @@ redis_client = aioredis.from_url(
     settings.REDIS_URL,
     decode_responses=True,
     socket_timeout=1.0,
-    socket_connect_timeout=1.0
+    socket_connect_timeout=1.0,
 )
 
 # In-memory fallback if Redis is down
 fallback_storage: dict[str, list[float]] = {}
 
+
 def get_user_tier_from_db(user_id: int) -> str:
     db: Session = SessionLocal()
     try:
-        user = db.query(User).filter(User.id == user_id, User.deleted_at.is_(None)).first()
+        user = (
+            db.query(User).filter(User.id == user_id, User.deleted_at.is_(None)).first()
+        )
         return user.tier if user else "FREE"
     finally:
         db.close()
+
 
 async def get_user_tier(user_id: int) -> str:
     try:
@@ -41,8 +45,10 @@ async def get_user_tier(user_id: int) -> str:
         logger.error(json.dumps({"event": "redis_tier_cache_failed", "error": str(e)}))
         return get_user_tier_from_db(user_id)
 
+
 def get_limit_for_tier(tier: str) -> int:
     return 1000 if tier == "PAID" else 100
+
 
 async def check_redis_limit(key: str, limit: int) -> bool:
     try:
@@ -56,6 +62,7 @@ async def check_redis_limit(key: str, limit: int) -> bool:
         logger.error(json.dumps({"event": "redis_rate_limit_failed", "error": str(e)}))
         return check_memory_limit(key, limit)
 
+
 def check_memory_limit(key: str, limit: int) -> bool:
     now = time.time()
     if key not in fallback_storage:
@@ -67,6 +74,7 @@ def check_memory_limit(key: str, limit: int) -> bool:
     fallback_storage[key].append(now)
     return True
 
+
 def extract_user_from_token(token: str) -> tuple[int | None, str]:
     try:
         payload = jwt.decode(token, settings.JWT_SECRET, algorithms=["HS256"])
@@ -76,18 +84,21 @@ def extract_user_from_token(token: str) -> tuple[int | None, str]:
     except jwt.PyJWTError:
         return None, "FREE"
 
+
 class RateLimitMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
+    async def dispatch(
+        self, request: Request, call_next: RequestResponseEndpoint
+    ) -> Response:
         if request.url.path == "/health" or request.url.path.endswith("/health"):
             return await call_next(request)
 
         auth_header = request.headers.get("Authorization")
         user_id, token_tier = None, "FREE"
-        
+
         if auth_header and auth_header.startswith("Bearer "):
             token = auth_header.split(" ")[1]
             user_id, token_tier = extract_user_from_token(token)
-        
+
         if user_id:
             tier = token_tier if token_tier != "FREE" else await get_user_tier(user_id)
             limit = get_limit_for_tier(tier)
@@ -95,13 +106,13 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         else:
             limit = 100  # unauthenticated rate limit
             key = f"ip:{request.client.host if request.client else 'unknown'}"
-            
+
         allowed = await check_redis_limit(key, limit)
         if not allowed:
             return Response(
                 content=json.dumps({"detail": "Rate limit exceeded"}),
                 status_code=429,
-                media_type="application/json"
+                media_type="application/json",
             )
-            
+
         return await call_next(request)

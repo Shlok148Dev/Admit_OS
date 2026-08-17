@@ -1,6 +1,7 @@
 from datetime import datetime
 from pydantic import BaseModel, EmailStr, Field
 
+
 class UserProfileResponse(BaseModel):
     id: int
     email: EmailStr
@@ -13,9 +14,11 @@ class UserProfileResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 class UserProfileUpdate(BaseModel):
     name: str | None = None
     phone: str | None = None
+
 
 class ExamDetailsRegister(BaseModel):
     primary_exam: str = Field(..., max_length=20)
@@ -26,6 +29,7 @@ class ExamDetailsRegister(BaseModel):
     home_state: str = Field(..., max_length=30)
     gender: str = Field(..., max_length=10)
     preferences: dict | None = None
+
 
 class StudentProfileResponse(BaseModel):
     id: int
@@ -43,6 +47,7 @@ class StudentProfileResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 class PredictionHistoryResponse(BaseModel):
     id: int
     user_id: int
@@ -54,6 +59,7 @@ class PredictionHistoryResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
 
 class MessageResponse(BaseModel):
     message: str

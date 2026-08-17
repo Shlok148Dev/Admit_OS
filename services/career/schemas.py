@@ -1,9 +1,11 @@
 from typing import List, Dict, Optional
 from pydantic import BaseModel, Field
 
+
 class CareerPathsRequest(BaseModel):
     branch_code: str = Field(..., description="e.g. CS, EC, ME")
     college_code: Optional[str] = Field(None, description="e.g. IIT_BOMBAY, NIT_TRICHY")
+
 
 class JobRoleDetail(BaseModel):
     title: str
@@ -13,17 +15,20 @@ class JobRoleDetail(BaseModel):
     companies: List[str]
     skills: List[str]
 
+
 class CareerPathsResponse(BaseModel):
     branch_code: str
     college_code: Optional[str]
     paths: List[JobRoleDetail]
     pg_programs: List[str]
 
+
 class BranchPlacementRates(BaseModel):
     iit_placement_rate: float
     iit_median_salary: float
     nit_placement_rate: float
     nit_median_salary: float
+
 
 class BranchOverviewResponse(BaseModel):
     code: str
@@ -35,9 +40,11 @@ class BranchOverviewResponse(BaseModel):
     transition_options: Dict[str, float]
     pg_feeds: List[str]
 
+
 class BranchCompareResponse(BaseModel):
     b1: BranchOverviewResponse
     b2: BranchOverviewResponse
+
 
 class ScholarshipResponse(BaseModel):
     id: int

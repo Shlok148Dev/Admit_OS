@@ -1,0 +1,441 @@
+[
+  {
+    "id": "TC_01",
+    "category": "MHT_CET_PREDICTION",
+    "query": "I got 98.4 percentile in MHT-CET, general category, Pune domicile. Can I get COEP CSE?",
+    "ground_truth_reference": "COEP Technological University Pune Computer Science closes at state ranks between 112 and 260 for General category under State Quota. A 98.4 percentile translates to an estimated state rank of ~6,400 out of 400,000 candidates, resulting in a very low or 0% admission probability for COEP CSE. Realistic alternatives include PICT, VIT Pune, SPIT, and PCCOE.",
+    "required_entities": ["COEP", "Computer Science", "GENERAL", "STATE", "6,400", "260"],
+    "banned_hallucinations": ["18 LPA", "20 LPA", "IIT Bombay", "JEE Main"],
+    "expected_tool": "predict_admission",
+    "expected_tool_args": {
+      "exam": "MHT_CET",
+      "percentile": 98.4,
+      "category": "GENERAL",
+      "institute": "COEP",
+      "branch": "Computer Science"
+    }
+  },
+  {
+    "id": "TC_02",
+    "category": "MHT_CET_PREDICTION",
+    "query": "What are my exact admission chances for Computer Engineering at PICT Pune with 98.9 percentile General Home University quota?",
+    "ground_truth_reference": "With a 98.9 percentile in MHT-CET corresponding to an estimated State Merit Rank of ~4,400, PICT Pune Computer Engineering under the General Home University quota is competitive with an estimated closing rank around 3,850 and an admission probability around 78%.",
+    "required_entities": ["PICT", "Pune", "Computer", "GENERAL", "HOME_UNIVERSITY", "4,400", "3,850"],
+    "banned_hallucinations": ["NIT Trichy", "JoSAA", "NEET"],
+    "expected_tool": "predict_admission",
+    "expected_tool_args": {
+      "exam": "MHT_CET",
+      "percentile": 98.9,
+      "category": "GENERAL",
+      "institute": "PICT",
+      "branch": "CS"
+    }
+  },
+  {
+    "id": "TC_03",
+    "category": "MHT_CET_PREDICTION",
+    "query": "Can I get AI and Data Science at PCCOE Pune with 91.2 percentile in OBC-NCL category?",
+    "ground_truth_reference": "At a 91.2 percentile in MHT-CET (estimated rank ~15,500), an OBC-NCL candidate has a strong 72% to 85% chance of securing Artificial Intelligence & Data Science at PCCOE Pune where the OBC closing rank is around 16,200.",
+    "required_entities": ["PCCOE", "Data Science", "OBC", "STATE", "15,500"],
+    "banned_hallucinations": ["IIT", "JEE Advanced"],
+    "expected_tool": "predict_admission",
+    "expected_tool_args": {
+      "exam": "MHT_CET",
+      "percentile": 91.2,
+      "category": "OBC-NCL",
+      "institute": "PCCOE",
+      "branch": "AIDS"
+    }
+  },
+  {
+    "id": "TC_04",
+    "category": "MHT_CET_PREDICTION",
+    "query": "What is the closing rank and my admission chance for VJTI Mumbai Computer Engineering with 99.4 percentile General category?",
+    "ground_truth_reference": "VJTI Mumbai Computer Engineering closes at an estimated State Merit Rank of ~180 to 240 for General State candidates. A 99.4 percentile corresponds to an estimated rank of ~2,400, placing the admission chance at a low probability (~5-10%).",
+    "required_entities": ["VJTI", "Mumbai", "Computer", "GENERAL", "STATE", "2,400"],
+    "banned_hallucinations": ["AIIMS", "MCC", "MBBS"],
+    "expected_tool": "predict_admission",
+    "expected_tool_args": {
+      "exam": "MHT_CET",
+      "percentile": 99.4,
+      "category": "GENERAL",
+      "institute": "VJTI",
+      "branch": "CS"
+    }
+  },
+  {
+    "id": "TC_05",
+    "category": "MHT_CET_PREDICTION",
+    "query": "Can I get Universal College of Engineering (UCOE Vasai) Computer Science at 68.4 percentile in MHT-CET?",
+    "ground_truth_reference": "At 68.4 percentile in MHT-CET (estimated State Merit Rank ~126,400), you have a strong chance (~88%) of securing Computer Science at Universal College of Engineering (UCOE Vasai) where the closing rank extends to ~112,000 to 128,000.",
+    "required_entities": ["Universal College", "Vasai", "Computer Science", "STATE", "GENERAL", "126,400"],
+    "banned_hallucinations": ["COEP", "IIT"],
+    "expected_tool": "predict_admission",
+    "expected_tool_args": {
+      "exam": "MHT_CET",
+      "percentile": 68.4,
+      "category": "GENERAL",
+      "institute": "UCOE_VASAI",
+      "branch": "CS"
+    }
+  },
+  {
+    "id": "TC_06",
+    "category": "MHT_CET_PREDICTION",
+    "query": "What are my chances for VIT Pune Information Technology under TFWS (Tuition Fee Waiver Scheme) with 96.5 percentile?",
+    "ground_truth_reference": "Under the Tuition Fee Waiver Scheme (TFWS) at VIT Pune, Information Technology is highly competitive because only 5% supernumerary seats exist, typically closing under rank ~3,500. At 96.5 percentile (rank ~14,000), admission under TFWS is a reach (~15% chance).",
+    "required_entities": ["VIT Pune", "Information Technology", "TFWS", "14,000", "5%"],
+    "banned_hallucinations": ["Stanford", "JoSAA"],
+    "expected_tool": "predict_admission",
+    "expected_tool_args": {
+      "exam": "MHT_CET",
+      "percentile": 96.5,
+      "category": "TFWS",
+      "institute": "VIT_PUNE",
+      "branch": "IT"
+    }
+  },
+  {
+    "id": "TC_07",
+    "category": "MHT_CET_PREDICTION",
+    "query": "What are my chances for Artificial Intelligence at DJSCE Mumbai under Gujarati Linguistic Minority quota with 84 percentile?",
+    "ground_truth_reference": "At Dwarkadas J. Sanghvi College of Engineering (DJSCE Mumbai), 50% of seats are reserved for Gujarati Linguistic Minority. At an 84 percentile (rank ~64,000), AI and specialized branches have an admission probability of ~45% to 60% under minority quota.",
+    "required_entities": ["DJSCE", "Mumbai", "Artificial Intelligence", "Gujarati", "Minority", "64,000"],
+    "banned_hallucinations": ["NEET", "MCC"],
+    "expected_tool": "predict_admission",
+    "expected_tool_args": {
+      "exam": "MHT_CET",
+      "percentile": 84.0,
+      "category": "GUJARATI_MINORITY",
+      "institute": "DJSCE",
+      "branch": "AI"
+    }
+  },
+  {
+    "id": "TC_08",
+    "category": "MHT_CET_PREDICTION",
+    "query": "Can an SC category student with 75 percentile get Computer Science at Walchand College of Engineering (WCE Sangli)?",
+    "ground_truth_reference": "At a 75 percentile in MHT-CET (estimated rank ~100,000 overall, ~6,500 SC category), Computer Science at WCE Sangli under the SC category is competitive with closing ranks around ~4,800 SC rank (~40% chance).",
+    "required_entities": ["Walchand", "Sangli", "Computer Science", "SC", "STATE"],
+    "banned_hallucinations": ["NIT Trichy", "JoSAA"],
+    "expected_tool": "predict_admission",
+    "expected_tool_args": {
+      "exam": "MHT_CET",
+      "percentile": 75.0,
+      "category": "SC",
+      "institute": "WCE_SANGLI",
+      "branch": "CS"
+    }
+  },
+  {
+    "id": "TC_09",
+    "category": "JOSAA_JEE_PREDICTION",
+    "query": "What are my chances for NIT Trichy CSE under Other State quota with AIR 2800 in General category?",
+    "ground_truth_reference": "At an All India Rank of 2,800 in the General category under the Other State (OS) quota, admission to Computer Science at NIT Tiruchirappalli is very low (~1% probability) because the OS General closing rank historically closes at 1,224.",
+    "required_entities": ["NIT Tiruchirappalli", "Computer Science", "OS", "GENERAL", "1%", "1,224"],
+    "banned_hallucinations": ["100%", "99%", "MHT-CET", "NEET"],
+    "expected_tool": "predict_admission",
+    "expected_tool_args": {
+      "exam": "JEE_MAIN",
+      "rank": 2800,
+      "category": "GENERAL",
+      "quota": "OS",
+      "institute": "NIT_TRICHY",
+      "branch": "CS"
+    }
+  },
+  {
+    "id": "TC_10",
+    "category": "JOSAA_JEE_PREDICTION",
+    "query": "What are my admission chances for MNIT Jaipur CSE under Other State quota at AIR 2800?",
+    "ground_truth_reference": "With an All India Rank of 2,800 under the Other State (OS) General quota, you have a very strong 99% chance of securing Computer Science at MNIT Jaipur where the closing rank is 4,711.",
+    "required_entities": ["Malaviya National Institute of Technology Jaipur", "Computer Science", "OS", "GENERAL", "99%", "4,711"],
+    "banned_hallucinations": ["0%", "1%", "MHT-CET"],
+    "expected_tool": "predict_admission",
+    "expected_tool_args": {
+      "exam": "JEE_MAIN",
+      "rank": 2800,
+      "category": "GENERAL",
+      "quota": "OS",
+      "institute": "MNIT_JAIPUR",
+      "branch": "CS"
+    }
+  },
+  {
+    "id": "TC_11",
+    "category": "JOSAA_JEE_PREDICTION",
+    "query": "Can I get Electronics & Telecommunication at NIT Surathkal with rank 4200 under Other State quota in JEE Main?",
+    "ground_truth_reference": "At an All India Rank of 4,200, you have a safe 99% chance of securing Electronics & Telecommunication / ECE at NIT Surathkal (NITK) under the Other State General quota where the closing rank is 4,227.",
+    "required_entities": ["NIT Surathkal", "Electronics", "OS", "GENERAL", "99%", "4,227"],
+    "banned_hallucinations": ["COEP", "VJTI", "NEET"],
+    "expected_tool": "predict_admission",
+    "expected_tool_args": {
+      "exam": "JEE_MAIN",
+      "rank": 4200,
+      "category": "GENERAL",
+      "quota": "OS",
+      "institute": "NIT_SURATHKAL",
+      "branch": "EXTC"
+    }
+  },
+  {
+    "id": "TC_12",
+    "category": "JOSAA_JEE_PREDICTION",
+    "query": "What are my chances for IIIT Kalyani Computer Science with JEE Main rank 130000 under General category?",
+    "ground_truth_reference": "At an All India Rank of 130,000 in the General category, admission to IIIT Kalyani Computer Science is out of reach (~1-4% chance) because the General OS closing rank terminates around 42,500.",
+    "required_entities": ["IIIT Kalyani", "Computer Science", "OS", "GENERAL", "42,500"],
+    "banned_hallucinations": ["99%", "95%", "MHT-CET"],
+    "expected_tool": "predict_admission",
+    "expected_tool_args": {
+      "exam": "JEE_MAIN",
+      "rank": 130000,
+      "category": "GENERAL",
+      "quota": "OS",
+      "institute": "IIIT_KALYANI",
+      "branch": "CS"
+    }
+  },
+  {
+    "id": "TC_13",
+    "category": "JOSAA_JEE_PREDICTION",
+    "query": "Can an ST category student with category rank 2800 get Computer Science at VNIT Nagpur under ST quota?",
+    "ground_truth_reference": "With an ST Category Rank of 2,800, you have an 82% admission probability of securing Computer Science at VNIT Nagpur under the ST quota where the closing rank sits at 3,100.",
+    "required_entities": ["VNIT Nagpur", "Computer Science", "OS", "ST", "82%", "3,100"],
+    "banned_hallucinations": ["0%", "1%", "NEET"],
+    "expected_tool": "predict_admission",
+    "expected_tool_args": {
+      "exam": "JEE_MAIN",
+      "rank": 2800,
+      "category": "ST",
+      "quota": "OS",
+      "institute": "VNIT_NAGPUR",
+      "branch": "CS"
+    }
+  },
+  {
+    "id": "TC_14",
+    "category": "JOSAA_JEE_PREDICTION",
+    "query": "What are my chances for IIIT Pune Computer Science with OBC-NCL category rank 12000 in JEE Main?",
+    "ground_truth_reference": "At an OBC-NCL Category Rank of 12,000, securing Computer Science at IIIT Pune is competitive (~55-65% chance) as the OBC closing rank typically settles around 11,500 to 13,000.",
+    "required_entities": ["IIIT Pune", "Computer Science", "OBC", "OS"],
+    "banned_hallucinations": ["AIIMS", "MAMC"],
+    "expected_tool": "predict_admission",
+    "expected_tool_args": {
+      "exam": "JEE_MAIN",
+      "rank": 12000,
+      "category": "OBC-NCL",
+      "quota": "OS",
+      "institute": "IIIT_PUNE",
+      "branch": "CS"
+    }
+  },
+  {
+    "id": "TC_15",
+    "category": "JOSAA_JEE_PREDICTION",
+    "query": "What are my chances for Electrical Engineering at IIT Guwahati with JEE Advanced rank 1850?",
+    "ground_truth_reference": "With a JEE Advanced All India Rank of 1,850 in the General category, you have a very high admission chance (>90%) for B.Tech Electrical Engineering at IIT Guwahati where the closing rank is typically ~2,200.",
+    "required_entities": ["IIT Guwahati", "Electrical", "JEE Advanced", "1,850"],
+    "banned_hallucinations": ["NEET", "MHT-CET", "MCC"],
+    "expected_tool": "predict_admission",
+    "expected_tool_args": {
+      "exam": "JEE_ADVANCED",
+      "rank": 1850,
+      "category": "GENERAL",
+      "institute": "IIT_GUWAHATI",
+      "branch": "EE"
+    }
+  },
+  {
+    "id": "TC_16",
+    "category": "PROCEDURAL_RULES",
+    "query": "Explain how Freeze, Float, and Slide work in JoSAA counseling.",
+    "ground_truth_reference": "In JoSAA counseling, Freeze means accepting the allotted seat and exiting further rounds. Float means accepting the allotted seat while remaining eligible for higher preferences across any institute in subsequent rounds. Slide means accepting the allotted seat while remaining eligible only for higher branch preferences within the same allotted institute.",
+    "required_entities": ["Freeze", "Float", "Slide", "subsequent rounds", "institute", "branch"],
+    "banned_hallucinations": ["₹50,000 fine", "Permanent blacklisting"],
+    "expected_tool": "retrieve_rules",
+    "expected_tool_args": {
+      "exam": "JEE_MAIN",
+      "topic": "willingness_options"
+    }
+  },
+  {
+    "id": "TC_17",
+    "category": "PROCEDURAL_RULES",
+    "query": "Explain MCC NEET rules for Free Exit in Round 1 and when the security deposit is forfeited.",
+    "ground_truth_reference": "In MCC NEET-UG counseling, Round 1 allows a Free Exit where a candidate can vacate the allotted seat without forfeiting their refundable security deposit. In Round 2, exiting an allotted seat results in Exit with Forfeiture of the security deposit (₹10,000 for government / ₹2,00,000 for deemed). If a candidate joins a Round 2 seat, they cannot vacate and cannot participate in state rounds.",
+    "required_entities": ["Free Exit", "Round 1", "Round 2", "forfeited", "security deposit", "₹10,000"],
+    "banned_hallucinations": ["IIT Bombay", "JoSAA"],
+    "expected_tool": "retrieve_rules",
+    "expected_tool_args": {
+      "exam": "NEET",
+      "topic": "refund_rules"
+    }
+  },
+  {
+    "id": "TC_18",
+    "category": "PROCEDURAL_RULES",
+    "query": "How does the Seat Acceptance Fee (SAF) paid in JoSAA adjust when moving to CSAB special rounds?",
+    "ground_truth_reference": "The Seat Acceptance Fee (SAF) paid during JoSAA counseling is automatically adjusted into the CSAB special round participation fee. Candidates only need to pay the non-refundable CSAB processing fee (~₹4,000) rather than paying the entire acceptance amount again.",
+    "required_entities": ["Seat Acceptance Fee", "JoSAA", "CSAB", "adjusted", "processing fee"],
+    "banned_hallucinations": ["Double payment mandatory", "NEET"],
+    "expected_tool": "retrieve_rules",
+    "expected_tool_args": {
+      "exam": "JEE_MAIN",
+      "topic": "csab_fee_adjustment"
+    }
+  },
+  {
+    "id": "TC_19",
+    "category": "PROCEDURAL_RULES",
+    "query": "What happens if I get my 1st preference allotted in Maharashtra CAP Round 1?",
+    "ground_truth_reference": "If a candidate is allotted their 1st preference in Maharashtra CAP Round 1, it is an Auto-Freeze allotment. The candidate must pay the seat acceptance fee and report to the allotted institute. They are strictly not eligible for betterment in CAP Round 2 and Round 3.",
+    "required_entities": ["1st preference", "Auto-Freeze", "CAP Round 1", "betterment", "not eligible"],
+    "banned_hallucinations": ["Can choose float freely", "JoSAA"],
+    "expected_tool": "retrieve_rules",
+    "expected_tool_args": {
+      "exam": "MHT_CET",
+      "topic": "cap_auto_freeze"
+    }
+  },
+  {
+    "id": "TC_20",
+    "category": "PROCEDURAL_RULES",
+    "query": "What is the validity requirement for Non-Creamy Layer (NCL) certificate in Maharashtra engineering admissions?",
+    "ground_truth_reference": "For Maharashtra state quota engineering admissions under OBC, VJ/NT, and SBC categories, the Non-Creamy Layer (NCL) certificate must be issued in the prescribed format and valid up to March 31 of the concluding academic year (e.g. valid through 31st March 2025).",
+    "required_entities": ["Non-Creamy Layer", "NCL", "March 31", "valid", "OBC"],
+    "banned_hallucinations": ["Lifetime validity", "Self-declaration only"],
+    "expected_tool": "retrieve_rules",
+    "expected_tool_args": {
+      "exam": "MHT_CET",
+      "topic": "ncl_validity"
+    }
+  },
+  {
+    "id": "TC_21",
+    "category": "PROCEDURAL_RULES",
+    "query": "What is the compulsory rural service bond duration and penalty amount for MBBS graduates from Maharashtra government medical colleges?",
+    "ground_truth_reference": "MBBS graduates from Maharashtra Government Medical Colleges (GMCs) are required to serve a 1-year compulsory rural service bond. The penalty for non-compliance or breaking the bond is ₹10 Lakh.",
+    "required_entities": ["1-year", "rural service", "bond", "₹10 Lakh", "Maharashtra", "GMC"],
+    "banned_hallucinations": ["5-year bond", "₹50 Lakh penalty"],
+    "expected_tool": "retrieve_rules",
+    "expected_tool_args": {
+      "exam": "NEET",
+      "topic": "rural_service_bond"
+    }
+  },
+  {
+    "id": "TC_22",
+    "category": "GOVERNANCE_DISAMBIGUATION",
+    "query": "Can I use my NEET score to get admission into IIT Bombay Computer Science?",
+    "ground_truth_reference": "You cannot use a NEET-UG score or medical counseling rank for admission to IIT Bombay Computer Science. Engineering admissions at IIT Bombay are conducted exclusively through JEE Advanced managed by JoSAA, whereas NEET-UG is strictly designated for undergraduate medical, dental, and AYUSH programs under MCC.",
+    "required_entities": ["cannot", "NEET", "IIT Bombay", "JEE Advanced", "JoSAA", "medical"],
+    "banned_hallucinations": ["Admission possible with NEET", "15% AIQ at IIT Bombay"],
+    "expected_tool": "check_governing_body",
+    "expected_tool_args": {
+      "query_exam": "NEET",
+      "target_institute": "IIT_BOMBAY",
+      "target_program": "Computer Science"
+    }
+  },
+  {
+    "id": "TC_23",
+    "category": "GOVERNANCE_DISAMBIGUATION",
+    "query": "Can I apply for MBBS at AIIMS New Delhi using my JEE Main score?",
+    "ground_truth_reference": "You cannot apply for MBBS at AIIMS New Delhi using a JEE Main score. Medical admissions to all AIIMS institutes are conducted solely through the NEET-UG examination managed centrally by the Medical Counseling Committee (MCC), while JEE Main is strictly for engineering admissions.",
+    "required_entities": ["cannot", "AIIMS", "MBBS", "NEET", "MCC", "JEE Main"],
+    "banned_hallucinations": ["Direct admission via JEE", "JoSAA MBBS quota"],
+    "expected_tool": "check_governing_body",
+    "expected_tool_args": {
+      "query_exam": "JEE_MAIN",
+      "target_institute": "AIIMS_DELHI",
+      "target_program": "MBBS"
+    }
+  },
+  {
+    "id": "TC_24",
+    "category": "GOVERNANCE_DISAMBIGUATION",
+    "query": "Can I apply to Stanford University undergraduate CS using my MHT-CET score?",
+    "ground_truth_reference": "You cannot apply to Stanford University using an MHT-CET score. MHT-CET is exclusively valid for state engineering and pharmacy colleges in Maharashtra, whereas Stanford University undergraduate admissions require the Common Application, SAT/ACT scores, and international academic credentials.",
+    "required_entities": ["cannot", "Stanford", "MHT-CET", "SAT", "Common Application", "Maharashtra"],
+    "banned_hallucinations": ["15% All India quota at Stanford", "DTE CAP Round at Stanford"],
+    "expected_tool": "check_governing_body",
+    "expected_tool_args": {
+      "query_exam": "MHT_CET",
+      "target_institute": "STANFORD",
+      "target_program": "CS"
+    }
+  },
+  {
+    "id": "TC_25",
+    "category": "GOVERNANCE_DISAMBIGUATION",
+    "query": "Can I get COEP Pune Computer Science through CSAB Special Rounds?",
+    "ground_truth_reference": "COEP Technological University Pune does not participate in CSAB Special Rounds. CSAB special rounds are conducted exclusively for NITs, IIITs, and Central GFTIs under JoSAA, while COEP admissions are managed independently by the Maharashtra State CET Cell through centralized CAP rounds.",
+    "required_entities": ["does not participate", "COEP", "CSAB", "Maharashtra", "State CET Cell", "CAP"],
+    "banned_hallucinations": ["CSAB Round 2 at COEP", "Centralized JoSAA quota at COEP"],
+    "expected_tool": "check_governing_body",
+    "expected_tool_args": {
+      "query_exam": "JEE_MAIN",
+      "target_institute": "COEP",
+      "counseling_body": "CSAB"
+    }
+  },
+  {
+    "id": "TC_26",
+    "category": "MULTI_TURN_PERSISTENCE",
+    "query": "wait i forgot to mention earlier that my category is actually OBC-NCL and i have a valid central OBC certificate! does that change anything for my college chances?",
+    "ground_truth_reference": "Updating your category from General to OBC-NCL dynamically recalculates your admission probabilities against OBC category cutoffs, expanding your competitive chances across central and state institutes.",
+    "required_entities": ["OBC-NCL", "Category", "recalculates", "probabilities"],
+    "banned_hallucinations": ["Category cannot be changed", "Permanently locked as General"],
+    "expected_tool": "predict_admission",
+    "expected_tool_args": {
+      "category": "OBC-NCL"
+    }
+  },
+  {
+    "id": "TC_27",
+    "category": "MULTI_TURN_PERSISTENCE",
+    "query": "what are my chances for PICT Pune Computer Science at my rank?",
+    "ground_truth_reference": "Evaluating PICT Pune Computer Science against the student's previously established rank of 4,400 (98.9 percentile) shows it is out of reach under general state quota since closing ranks terminate around 480.",
+    "required_entities": ["4,400", "PICT", "Computer Science", "closing rank", "480"],
+    "banned_hallucinations": ["Please state your percentile again", "Rank unknown"],
+    "expected_tool": "predict_admission",
+    "expected_tool_args": {
+      "institute": "PICT",
+      "branch": "CS"
+    }
+  },
+  {
+    "id": "TC_28",
+    "category": "MULTI_TURN_PERSISTENCE",
+    "query": "yes",
+    "ground_truth_reference": "Responding 'yes' to an affirmative cutoff offer immediately presents the requested college cutoff prediction table and direct probability verdict without repeating background context or prior discussions.",
+    "required_entities": ["chance", "closing rank", "quota", "category"],
+    "banned_hallucinations": ["Hello! I am ARIA", "How can I help you today?"],
+    "expected_tool": "predict_admission",
+    "expected_tool_args": {}
+  },
+  {
+    "id": "TC_29",
+    "category": "MULTI_TURN_PERSISTENCE",
+    "query": "What if I look outside Pune — how does VJTI Mumbai and SPIT Mumbai compare to PICT Pune for tech placements?",
+    "ground_truth_reference": "Comparing VJTI Mumbai (₹18-20 LPA CS median), SPIT Mumbai (₹15-16.5 LPA), and PICT Pune (₹12.5 LPA) highlights superior tier-1 fintech and product density in Mumbai while retaining the student's 98.9 percentile profile.",
+    "required_entities": ["VJTI", "SPIT", "PICT", "Mumbai", "Pune"],
+    "banned_hallucinations": ["IIT Bombay CSE ₹1 Cr mandatory", "Stanford"],
+    "expected_tool": "compare_colleges",
+    "expected_tool_args": {
+      "institutes": ["VJTI_MUMBAI", "SPIT_MUMBAI", "PICT_PUNE"]
+    }
+  },
+  {
+    "id": "TC_30",
+    "category": "MULTI_TURN_PERSISTENCE",
+    "query": "Wait, I thought PICT's average placement package for CSE was ₹28 LPA, didn't you say that earlier?",
+    "ground_truth_reference": "Resisting sycophancy and correcting the user's assertion by stating verified institutional facts: PICT Pune average B.Tech Computer Engineering package is ₹11.23 LPA to ₹12.5 LPA, with domestic highest up to ₹44 LPA and international highest reaching ₹1.1 Crore.",
+    "required_entities": ["PICT", "11.23 LPA", "12.5 LPA", "not ₹28 LPA", "verified"],
+    "banned_hallucinations": ["Yes, PICT average is ₹28 LPA", "You are right, I apologize"],
+    "expected_tool": "retrieve_rules",
+    "expected_tool_args": {
+      "institute": "PICT_PUNE"
+    }
+  }
+]

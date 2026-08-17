@@ -4,7 +4,7 @@ Training script for JEE_MAIN, NEET, and MHT_CET cutoff prediction models.
 
 import os
 import logging
-from typing import Dict, List, Tuple, Any
+from typing import Dict, List, Tuple
 import numpy as np
 import pandas as pd
 import xgboost as xgb
@@ -34,16 +34,28 @@ def init_and_get_data(db: Session, exam_type: str) -> pd.DataFrame:
 
     records = []
     for c in cutoffs:
-        records.append({
-            "college_code": c.college_code, "branch_code": c.branch_code,
-            "category": c.category, "quota": c.quota, "gender": "M",
-            "year": c.year, "closing_rank": c.closing_rank,
-        })
-        records.append({
-            "college_code": c.college_code, "branch_code": c.branch_code,
-            "category": c.category, "quota": c.quota, "gender": "F",
-            "year": c.year, "closing_rank": int(c.closing_rank * 1.2),
-        })
+        records.append(
+            {
+                "college_code": c.college_code,
+                "branch_code": c.branch_code,
+                "category": c.category,
+                "quota": c.quota,
+                "gender": "M",
+                "year": c.year,
+                "closing_rank": c.closing_rank,
+            }
+        )
+        records.append(
+            {
+                "college_code": c.college_code,
+                "branch_code": c.branch_code,
+                "category": c.category,
+                "quota": c.quota,
+                "gender": "F",
+                "year": c.year,
+                "closing_rank": int(c.closing_rank * 1.2),
+            }
+        )
 
     return pd.DataFrame(records)
 
@@ -57,11 +69,13 @@ def calculate_metrics(y_true: np.ndarray, y_pred: np.ndarray) -> Dict[str, float
     return {
         "mae": mae,
         "within_500_accuracy": within_500,
-        "within_200_accuracy": within_200
+        "within_200_accuracy": within_200,
     }
 
 
-def split_data(df_enc: pd.DataFrame, features: List[str]) -> Tuple[pd.DataFrame, pd.Series, pd.DataFrame, np.ndarray]:
+def split_data(
+    df_enc: pd.DataFrame, features: List[str]
+) -> Tuple[pd.DataFrame, pd.Series, pd.DataFrame, np.ndarray]:
     """Split the encoded dataframe into training and validation sets."""
     train_df = df_enc[df_enc["year"] < 2024]
     val_df = df_enc[df_enc["year"] == 2024]
@@ -82,7 +96,11 @@ def split_data(df_enc: pd.DataFrame, features: List[str]) -> Tuple[pd.DataFrame,
     return X_train, y_train, X_val, y_val_orig
 
 
-def build_mappings(df_lags: pd.DataFrame) -> Tuple[Dict[str, int], Dict[str, int], Dict[str, int], Dict[str, int], Dict[str, int]]:
+def build_mappings(
+    df_lags: pd.DataFrame,
+) -> Tuple[
+    Dict[str, int], Dict[str, int], Dict[str, int], Dict[str, int], Dict[str, int]
+]:
     """Build mappings from unique values in training data."""
     col_map = {v: i for i, v in enumerate(df_lags["college_code"].unique())}
     br_map = {v: i for i, v in enumerate(df_lags["branch_code"].unique())}
@@ -93,8 +111,12 @@ def build_mappings(df_lags: pd.DataFrame) -> Tuple[Dict[str, int], Dict[str, int
 
 
 def encode_features(
-    df_lags: pd.DataFrame, col_map: Dict[str, int], br_map: Dict[str, int],
-    cat_map: Dict[str, int], q_map: Dict[str, int], g_map: Dict[str, int]
+    df_lags: pd.DataFrame,
+    col_map: Dict[str, int],
+    br_map: Dict[str, int],
+    cat_map: Dict[str, int],
+    q_map: Dict[str, int],
+    g_map: Dict[str, int],
 ) -> pd.DataFrame:
     """Encode categorical columns based on built mappings."""
     df_enc = df_lags.copy()
@@ -106,16 +128,22 @@ def encode_features(
     return df_enc
 
 
-def fit_models(X_train: pd.DataFrame, y_train: pd.Series) -> Tuple[xgb.XGBRegressor, lgb.LGBMRegressor]:
+def fit_models(
+    X_train: pd.DataFrame, y_train: pd.Series
+) -> Tuple[xgb.XGBRegressor, lgb.LGBMRegressor]:
     """Fit XGBoost and LightGBM model regressors."""
     xgb_reg = xgb.XGBRegressor(n_estimators=100, max_depth=4, random_state=42)
-    lgb_reg = lgb.LGBMRegressor(n_estimators=100, max_depth=4, random_state=42, verbose=-1)
+    lgb_reg = lgb.LGBMRegressor(
+        n_estimators=100, max_depth=4, random_state=42, verbose=-1
+    )
     xgb_reg.fit(X_train, y_train)
     lgb_reg.fit(X_train, y_train)
     return xgb_reg, lgb_reg
 
 
-def mlflow_logging(exam_type: str, metrics: Dict[str, float], ensemble_model: EnsembleModel) -> None:
+def mlflow_logging(
+    exam_type: str, metrics: Dict[str, float], ensemble_model: EnsembleModel
+) -> None:
     """Log parameters, metrics, and register model to MLflow."""
     mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "sqlite:///mlflow.db"))
     mlflow.set_experiment(os.getenv("MLFLOW_EXPERIMENT_NAME", "cutoff_prediction"))
@@ -126,7 +154,7 @@ def mlflow_logging(exam_type: str, metrics: Dict[str, float], ensemble_model: En
         mlflow.pyfunc.log_model(
             artifact_path="model",
             python_model=ensemble_model,
-            registered_model_name=f"cutoff_{exam_type}"
+            registered_model_name=f"cutoff_{exam_type}",
         )
 
 
@@ -137,8 +165,13 @@ def train_and_log_model(exam_type: str, df: pd.DataFrame) -> None:
     df_enc = encode_features(df_lags, col_map, br_map, cat_map, q_map, g_map)
 
     features = [
-        "college_code_enc", "branch_code_enc", "category_enc",
-        "quota_enc", "gender_enc", "lag_1", "lag_2"
+        "college_code_enc",
+        "branch_code_enc",
+        "category_enc",
+        "quota_enc",
+        "gender_enc",
+        "lag_1",
+        "lag_2",
     ]
     X_train, y_train, X_val, y_val_orig = split_data(df_enc, features)
     xgb_reg, lgb_reg = fit_models(X_train, y_train)
@@ -155,9 +188,16 @@ def train_and_log_model(exam_type: str, df: pd.DataFrame) -> None:
     logger.info(f"{exam_type} validation metrics: {metrics}")
 
     ensemble_model = EnsembleModel(
-        xgb_model=xgb_reg, lgb_model=lgb_reg, xgb_weight=0.55, lgb_weight=0.45,
-        college_map=col_map, branch_map=br_map, cat_map=cat_map,
-        quota_map=q_map, gender_map=g_map, residuals=residuals
+        xgb_model=xgb_reg,
+        lgb_model=lgb_reg,
+        xgb_weight=0.55,
+        lgb_weight=0.45,
+        college_map=col_map,
+        branch_map=br_map,
+        cat_map=cat_map,
+        quota_map=q_map,
+        gender_map=g_map,
+        residuals=residuals,
     )
     mlflow_logging(exam_type, metrics, ensemble_model)
 

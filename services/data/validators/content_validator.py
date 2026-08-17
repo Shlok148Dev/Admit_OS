@@ -22,6 +22,7 @@ from services.prediction.database import SMEReviewQueue
 
 logger = logging.getLogger("content_validator")
 
+
 class ContentValidationAgent:
     """Agent responsible for checking incoming exam cutoff records before ingestion."""
 
@@ -32,51 +33,73 @@ class ContentValidationAgent:
         """Verify presence of fields, correct data types, and range of metadata."""
         errors: List[str] = []
         required_fields = [
-            "exam_type", "counseling_body", "year", "round_number",
-            "college_code", "branch_code", "category", "quota",
-            "opening_rank", "closing_rank", "source_url"
+            "exam_type",
+            "counseling_body",
+            "year",
+            "round_number",
+            "college_code",
+            "branch_code",
+            "category",
+            "quota",
+            "opening_rank",
+            "closing_rank",
+            "source_url",
         ]
-        
+
         # 1. Required keys check
         for field in required_fields:
             if field not in record or record[field] is None:
                 errors.append(f"Missing required field: '{field}'")
-                
+
         if errors:
             return errors
 
         # 2. Type validation
-        if not isinstance(record["exam_type"], str) or record["exam_type"] not in ["JEE_MAIN", "JEE_ADVANCED", "NEET", "MHT_CET"]:
+        if not isinstance(record["exam_type"], str) or record["exam_type"] not in [
+            "JEE_MAIN",
+            "JEE_ADVANCED",
+            "NEET",
+            "MHT_CET",
+        ]:
             errors.append(f"Invalid exam_type: {record.get('exam_type')}")
-            
-        if not isinstance(record["counseling_body"], str) or not record["counseling_body"]:
+
+        if (
+            not isinstance(record["counseling_body"], str)
+            or not record["counseling_body"]
+        ):
             errors.append("counseling_body must be a non-empty string")
-            
+
         if not isinstance(record["year"], int) or not (2000 <= record["year"] <= 2100):
             errors.append(f"Invalid year: {record.get('year')}")
-            
+
         if not isinstance(record["round_number"], int) or record["round_number"] <= 0:
             errors.append(f"Invalid round_number: {record.get('round_number')}")
-            
+
         if not isinstance(record["college_code"], str) or not record["college_code"]:
             errors.append("college_code must be a non-empty string")
-            
+
         if not isinstance(record["branch_code"], str) or not record["branch_code"]:
             errors.append("branch_code must be a non-empty string")
-            
+
         if not isinstance(record["category"], str) or not record["category"]:
             errors.append("category must be a non-empty string")
-            
+
         if not isinstance(record["quota"], str) or not record["quota"]:
             errors.append("quota must be a non-empty string")
 
         if not isinstance(record["opening_rank"], int) or record["opening_rank"] <= 0:
-            errors.append(f"opening_rank must be a positive integer, got: {record.get('opening_rank')}")
+            errors.append(
+                f"opening_rank must be a positive integer, got: {record.get('opening_rank')}"
+            )
 
         if not isinstance(record["closing_rank"], int) or record["closing_rank"] <= 0:
-            errors.append(f"closing_rank must be a positive integer, got: {record.get('closing_rank')}")
-            
-        if not isinstance(record["source_url"], str) or not record["source_url"].startswith("http"):
+            errors.append(
+                f"closing_rank must be a positive integer, got: {record.get('closing_rank')}"
+            )
+
+        if not isinstance(record["source_url"], str) or not record[
+            "source_url"
+        ].startswith("http"):
             errors.append("source_url must be a valid http/https URL")
 
         return errors
@@ -88,7 +111,9 @@ class ContentValidationAgent:
         cl = record.get("closing_rank")
         if isinstance(op, int) and isinstance(cl, int):
             if cl < op:
-                errors.append(f"Range check failed: closing_rank ({cl}) is less than opening_rank ({op})")
+                errors.append(
+                    f"Range check failed: closing_rank ({cl}) is less than opening_rank ({op})"
+                )
         return errors
 
     def validate_historical_plausibility(
@@ -137,7 +162,9 @@ class ContentValidationAgent:
 
         return anomalies
 
-    def validate_cross_source(self, cross_source_values: List[int]) -> tuple[str, List[str]]:
+    def validate_cross_source(
+        self, cross_source_values: List[int]
+    ) -> tuple[str, List[str]]:
         """
         Validate agreement across multiple scraped values.
         Agreement required:
@@ -180,7 +207,7 @@ class ContentValidationAgent:
         self,
         record: Dict[str, Any],
         historical_ranks: Optional[List[int]] = None,
-        cross_source_values: Optional[List[int]] = None
+        cross_source_values: Optional[List[int]] = None,
     ) -> Dict[str, Any]:
         """
         Run all validation checks on the record.
@@ -189,19 +216,23 @@ class ContentValidationAgent:
         # 1. Schema Check
         schema_errors = self.validate_schema(record)
         if schema_errors:
-            self._push_to_sme_queue(record, f"Schema errors: {', '.join(schema_errors)}")
+            self._push_to_sme_queue(
+                record, f"Schema errors: {', '.join(schema_errors)}"
+            )
             return {
                 "is_valid": False,
                 "confidence": "LOW",
                 "errors": schema_errors,
-                "anomalies": []
+                "anomalies": [],
             }
 
         # 2. Range Check
         range_errors = self.validate_range(record)
-        
+
         # 3. Historical 3-sigma check
-        anomalies = self.validate_historical_plausibility(record, historical_ranks or [])
+        anomalies = self.validate_historical_plausibility(
+            record, historical_ranks or []
+        )
 
         # 4. Cross-source check
         confidence, cross_errors = self.validate_cross_source(cross_source_values or [])
@@ -215,10 +246,10 @@ class ContentValidationAgent:
         # - Low confidence tier
         # - High -> Medium downgrade (cross_errors present)
         should_review = (
-            not is_valid or 
-            len(anomalies) > 0 or 
-            confidence == "LOW" or 
-            len(cross_errors) > 0
+            not is_valid
+            or len(anomalies) > 0
+            or confidence == "LOW"
+            or len(cross_errors) > 0
         )
 
         if should_review:
@@ -231,20 +262,23 @@ class ContentValidationAgent:
                 reasons.extend(cross_errors)
             if confidence == "LOW":
                 reasons.append("Low confidence data")
-            
+
             self._push_to_sme_queue(record, "; ".join(reasons))
 
         return {
             "is_valid": is_valid and (confidence != "LOW"),
             "confidence": confidence,
             "errors": all_errors,
-            "anomalies": anomalies
+            "anomalies": anomalies,
         }
 
     def _push_to_sme_queue(self, record: Dict[str, Any], reason: str) -> None:
         """Push low confidence or anomalous row to sme_review_queue."""
         if not self.db:
-            logger.warning("No DB session provided. Skipping push to sme_review_queue for: %s", reason)
+            logger.warning(
+                "No DB session provided. Skipping push to sme_review_queue for: %s",
+                reason,
+            )
             return
 
         try:
@@ -263,11 +297,14 @@ class ContentValidationAgent:
                 allotted_seats=record.get("allotted_seats"),
                 source_url=record["source_url"],
                 reason=reason[:255],  # Ensure fits in VARCHAR(255)
-                resolved=False
+                resolved=False,
             )
             self.db.add(queue_item)
             self.db.commit()
-            logger.info("Successfully pushed anomalous record to sme_review_queue. Reason: %s", reason)
+            logger.info(
+                "Successfully pushed anomalous record to sme_review_queue. Reason: %s",
+                reason,
+            )
         except Exception as e:
             if self.db:
                 self.db.rollback()

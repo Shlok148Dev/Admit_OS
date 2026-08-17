@@ -67,7 +67,9 @@ class FCMSender:
     ) -> str:
         """Sends a notification to a topic subscription."""
         if not self.enabled:
-            logger.info("FCM stub: Sent to topic %s (body length: %d)", topic, len(body))
+            logger.info(
+                "FCM stub: Sent to topic %s (body length: %d)", topic, len(body)
+            )
             return "mock_topic_msg_id"
 
         try:
@@ -90,7 +92,9 @@ class FCMSender:
     ) -> List[str]:
         """Sends a notification to a batch of device tokens in chunks of 500."""
         if not self.enabled:
-            logger.info("FCM stub: Sent batch of %d (body length: %d)", len(tokens), len(body))
+            logger.info(
+                "FCM stub: Sent batch of %d (body length: %d)", len(tokens), len(body)
+            )
             return ["mock_msg_id"] * len(tokens)
 
         message_ids: List[str] = []

@@ -7,15 +7,14 @@ from fastapi.testclient import TestClient
 # to avoid JWT secret mismatch when settings singleton is cached
 os.environ["DATABASE_URL"] = "sqlite:///./test_admitos.db"
 os.environ["ENVIRONMENT"] = "development"
-os.environ["JWT_SECRET"] = "super-secret-access-key-12345"
-os.environ["JWT_REFRESH_SECRET"] = "super-secret-refresh-key-54321"
+os.environ["JWT_SECRET"] = "e7b92f410c854d92a188f4b1d92e8c3a504b2c1d3e5f7a9b0c2d4e6f8a0b2c4d"
+os.environ["JWT_REFRESH_SECRET"] = "a1b2c3d4e5f67890123456789abcdef0123456789abcdef0123456789abcdef"
 
 from services.auth.main import app as auth_app
 from services.user.main import app as user_app
 from services.auth.db import Base, engine, SessionLocal
 from services.user.db import engine as user_engine, Base as UserBase
-from services.auth.models import User, RefreshToken
-from services.user.models import StudentProfile, PredictionHistory
+from services.auth.models import User
 
 
 @pytest.fixture(autouse=True, scope="module")
@@ -47,9 +46,15 @@ def setup_db():
 auth_client = TestClient(auth_app)
 user_client = TestClient(user_app)
 
+
 def test_register_login_refresh_flow():
     # 1. Register User
-    reg_data = {"email": "services_test_student@example.com", "password": "securepassword123", "name": "Admit Aspirant", "phone": "9876543210"}
+    reg_data = {
+        "email": "services_test_student@example.com",
+        "password": "securepassword123",
+        "name": "Admit Aspirant",
+        "phone": "9876543210",
+    }
     resp = auth_client.post("/v1/auth/register", json=reg_data)
     print("Register Status Code:", resp.status_code)
     print("Register Response Body:", resp.text)
@@ -58,13 +63,18 @@ def test_register_login_refresh_flow():
 
     # Manually verify the user in db for login (or via verification token)
     db = SessionLocal()
-    db_user = db.query(User).filter(User.email == "services_test_student@example.com").first()
+    db_user = (
+        db.query(User).filter(User.email == "services_test_student@example.com").first()
+    )
     db_user.is_verified = True
     db.commit()
     db.close()
 
     # 2. Login User
-    login_data = {"email": "services_test_student@example.com", "password": "securepassword123"}
+    login_data = {
+        "email": "services_test_student@example.com",
+        "password": "securepassword123",
+    }
     resp = auth_client.post("/v1/auth/login", json=login_data)
     assert resp.status_code == 200
     tokens = resp.json()
@@ -72,12 +82,15 @@ def test_register_login_refresh_flow():
     assert "refresh_token" in tokens
 
     # 3. Refresh Token
-    refresh_resp = auth_client.post("/v1/auth/refresh", json={"refresh_token": tokens["refresh_token"]})
+    refresh_resp = auth_client.post(
+        "/v1/auth/refresh", json={"refresh_token": tokens["refresh_token"]}
+    )
     assert refresh_resp.status_code == 200
     new_tokens = refresh_resp.json()
     assert "access_token" in new_tokens
-    
+
     return tokens["access_token"]
+
 
 def test_sso_endpoints():
     # Google SSO
@@ -89,6 +102,7 @@ def test_sso_endpoints():
     resp = auth_client.post("/v1/auth/apple-sso", json={"token": "mock-apple-token"})
     assert resp.status_code == 200
     assert "access_token" in resp.json()
+
 
 def test_user_profile_operations():
     """Test user profile CRUD via user service endpoints."""
@@ -114,6 +128,7 @@ def test_user_profile_operations():
 
     # Mint a valid JWT using the user service's JWT_SECRET
     from services.user.config import settings as user_settings
+
     payload = {
         "sub": str(user_id),
         "type": "access",
@@ -124,14 +139,16 @@ def test_user_profile_operations():
 
     # 1. Get Profile
     get_resp = user_client.get("/v1/profile/me", headers=headers)
-    assert get_resp.status_code == 200, f"Expected 200, got {get_resp.status_code}: {get_resp.text}"
+    assert (
+        get_resp.status_code == 200
+    ), f"Expected 200, got {get_resp.status_code}: {get_resp.text}"
     assert get_resp.json()["email"] == "services_test_profile@example.com"
 
     # 2. Update Profile
     update_resp = user_client.patch(
         "/v1/profile/me",
         json={"name": "Updated Name", "phone": "1112223333"},
-        headers=headers
+        headers=headers,
     )
     assert update_resp.status_code == 200
     assert update_resp.json()["name"] == "Updated Name"
@@ -145,9 +162,11 @@ def test_user_profile_operations():
         "category": "GENERAL",
         "home_state": "MH",
         "gender": "M",
-        "preferences": {"CS": 0.8, "EC": 0.2}
+        "preferences": {"CS": 0.8, "EC": 0.2},
     }
-    exam_resp = user_client.post("/v1/profile/exam-details", json=exam_data, headers=headers)
+    exam_resp = user_client.post(
+        "/v1/profile/exam-details", json=exam_data, headers=headers
+    )
     assert exam_resp.status_code == 200
     assert exam_resp.json()["rank"] == 4500
 

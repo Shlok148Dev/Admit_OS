@@ -6,7 +6,12 @@ import logging
 import secrets
 import jwt
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials, HTTPBasic, HTTPBasicCredentials
+from fastapi.security import (
+    HTTPBearer,
+    HTTPAuthorizationCredentials,
+    HTTPBasic,
+    HTTPBasicCredentials,
+)
 
 from services.analytics.config import settings
 
@@ -15,7 +20,10 @@ logger: logging.Logger = logging.getLogger("analytics_service.auth")
 bearer_scheme = HTTPBearer()
 basic_scheme = HTTPBasic()
 
-def get_current_user_id(credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)) -> int:
+
+def get_current_user_id(
+    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+) -> int:
     """Validate JWT token and return the student user_id."""
     token = credentials.credentials
     try:
@@ -24,17 +32,20 @@ def get_current_user_id(credentials: HTTPAuthorizationCredentials = Depends(bear
         if not user_id or payload.get("type") != "access":
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid token or token type"
+                detail="Invalid token or token type",
             )
         return int(user_id)
     except Exception as e:
         logger.error(f"JWT validation failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials"
+            detail="Could not validate credentials",
         )
 
-def authenticate_admin(credentials: HTTPBasicCredentials = Depends(basic_scheme)) -> str:
+
+def authenticate_admin(
+    credentials: HTTPBasicCredentials = Depends(basic_scheme),
+) -> str:
     """Validate basic admin credentials."""
     correct_username = settings.ADMIN_USERNAME
     correct_password = settings.ADMIN_PASSWORD

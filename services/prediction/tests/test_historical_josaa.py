@@ -18,8 +18,6 @@ Historical accuracy target: ≥80% of predictions within 500 ranks of actual.
 from __future__ import annotations
 
 import os
-import sys
-import pathlib
 
 # Set DATABASE_URL to SQLite for test isolation before any app imports
 os.environ.setdefault("DATABASE_URL", "sqlite:///./test_pred_hist.db")
@@ -32,6 +30,7 @@ import pytest
 # ---------------------------------------------------------------------------
 # Helpers to avoid importing heavy FastAPI app in unit tests
 # ---------------------------------------------------------------------------
+
 
 def _build_real_training_df() -> pd.DataFrame:
     """Build a training DataFrame with real JoSAA closing ranks (2019-2024).
@@ -138,8 +137,16 @@ def _build_real_training_df() -> pd.DataFrame:
 
     df = pd.DataFrame(
         real_rows,
-        columns=["college_code", "branch_code", "category", "quota", "gender",
-                 "year", "closing_rank", "opening_rank"]
+        columns=[
+            "college_code",
+            "branch_code",
+            "category",
+            "quota",
+            "gender",
+            "year",
+            "closing_rank",
+            "opening_rank",
+        ],
     )
     return df
 
@@ -149,9 +156,16 @@ def _build_real_training_df() -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 
 REAL_COLLEGE_MAP = {
-    "IIT_BOMBAY": 0, "IIT_DELHI": 1, "IIT_MADRAS": 2,
-    "NIT_TRICHY": 3, "NIT_SURATHKAL": 4, "NIT_WARANGAL": 5,
-    "IIIT_ALLAHABAD": 6, "COEP_PUNE": 7, "ICT_MUMBAI": 8, "VNIT_NAGPUR": 9,
+    "IIT_BOMBAY": 0,
+    "IIT_DELHI": 1,
+    "IIT_MADRAS": 2,
+    "NIT_TRICHY": 3,
+    "NIT_SURATHKAL": 4,
+    "NIT_WARANGAL": 5,
+    "IIIT_ALLAHABAD": 6,
+    "COEP_PUNE": 7,
+    "ICT_MUMBAI": 8,
+    "VNIT_NAGPUR": 9,
 }
 REAL_BRANCH_MAP = {"CS": 0, "EC": 1, "ME": 2}
 REAL_CAT_MAP = {"GENERAL": 0, "OBC_NCL": 1, "SC": 2, "ST": 3, "EWS": 4}
@@ -171,11 +185,26 @@ class RealDataPredictor:
     def __init__(self) -> None:
         import xgboost as xgb
         import lightgbm as lgb
+
         # Higher min_child_weight and lower max_depth to prevent overfitting on small set
-        self.xgb = xgb.XGBRegressor(n_estimators=300, max_depth=3, learning_rate=0.03,
-                                     subsample=0.8, min_child_weight=3, random_state=42, verbosity=0)
-        self.lgb = lgb.LGBMRegressor(n_estimators=300, max_depth=3, learning_rate=0.03,
-                                      subsample=0.8, min_child_samples=3, random_state=42, verbose=-1)
+        self.xgb = xgb.XGBRegressor(
+            n_estimators=300,
+            max_depth=3,
+            learning_rate=0.03,
+            subsample=0.8,
+            min_child_weight=3,
+            random_state=42,
+            verbosity=0,
+        )
+        self.lgb = lgb.LGBMRegressor(
+            n_estimators=300,
+            max_depth=3,
+            learning_rate=0.03,
+            subsample=0.8,
+            min_child_samples=3,
+            random_state=42,
+            verbose=-1,
+        )
         self.xgb_w = 0.55
         self.lgb_w = 0.45
         self.residuals: np.ndarray = np.array([])
@@ -190,7 +219,9 @@ class RealDataPredictor:
         return enc
 
     def _add_lags(self, df: pd.DataFrame) -> pd.DataFrame:
-        df = df.sort_values(["college_code", "branch_code", "category", "quota", "gender", "year"])
+        df = df.sort_values(
+            ["college_code", "branch_code", "category", "quota", "gender", "year"]
+        )
         grp_cols = ["college_code", "branch_code", "category", "quota", "gender"]
         df_lag1 = df[grp_cols + ["year", "closing_rank"]].copy()
         df_lag1["year"] = df_lag1["year"] + 1
@@ -204,11 +235,19 @@ class RealDataPredictor:
 
     def train(self, df: pd.DataFrame) -> float:
         from sklearn.metrics import mean_absolute_error
+
         df_lag = self._add_lags(df)
         enc = self._featurise(df_lag)
         features = [
-            "college_enc", "branch_enc", "cat_enc", "quota_enc", "gender_enc",
-            "lag_1", "lag_2", "lag_mean", "lag_delta",
+            "college_enc",
+            "branch_enc",
+            "cat_enc",
+            "quota_enc",
+            "gender_enc",
+            "lag_1",
+            "lag_2",
+            "lag_mean",
+            "lag_delta",
         ]
         enc["lag_1_raw"] = enc["lag_1"].copy()
         enc["lag_2_raw"] = enc["lag_2"].copy()
@@ -221,26 +260,35 @@ class RealDataPredictor:
         self.xgb.fit(X, y)
         self.lgb.fit(X, y)
         pred = self.xgb_w * self.xgb.predict(X) + self.lgb_w * self.lgb.predict(X)
-        self.residuals = (y.values - pred)
+        self.residuals = y.values - pred
         mae = float(mean_absolute_error(enc["closing_rank"].values, np.expm1(pred)))
         return mae
 
     def predict(
         self,
-        college: str, branch: str, category: str, quota: str, gender: str,
-        lag_1: float, lag_2: float
+        college: str,
+        branch: str,
+        category: str,
+        quota: str,
+        gender: str,
+        lag_1: float,
+        lag_2: float,
     ) -> tuple[float, np.ndarray]:
-        x = pd.DataFrame([{
-            "college_enc": REAL_COLLEGE_MAP.get(college, 5),
-            "branch_enc": REAL_BRANCH_MAP.get(branch, 0),
-            "cat_enc": REAL_CAT_MAP.get(category, 0),
-            "quota_enc": REAL_QUOTA_MAP.get(quota, 0),
-            "gender_enc": REAL_GENDER_MAP.get(gender, 0),
-            "lag_1": np.log1p(lag_1),
-            "lag_2": np.log1p(lag_2),
-            "lag_mean": np.log1p((lag_1 + lag_2) / 2.0),
-            "lag_delta": lag_1 - lag_2,
-        }])
+        x = pd.DataFrame(
+            [
+                {
+                    "college_enc": REAL_COLLEGE_MAP.get(college, 5),
+                    "branch_enc": REAL_BRANCH_MAP.get(branch, 0),
+                    "cat_enc": REAL_CAT_MAP.get(category, 0),
+                    "quota_enc": REAL_QUOTA_MAP.get(quota, 0),
+                    "gender_enc": REAL_GENDER_MAP.get(gender, 0),
+                    "lag_1": np.log1p(lag_1),
+                    "lag_2": np.log1p(lag_2),
+                    "lag_mean": np.log1p((lag_1 + lag_2) / 2.0),
+                    "lag_delta": lag_1 - lag_2,
+                }
+            ]
+        )
         px = self.xgb.predict(x)[0]
         pl = self.lgb.predict(x)[0]
         model_point = self.xgb_w * px + self.lgb_w * pl
@@ -255,8 +303,11 @@ class RealDataPredictor:
         np.random.seed(42)
         if len(self.residuals) > 0:
             small_res = self.residuals[np.abs(self.residuals) < np.std(self.residuals)]
-            res = np.random.choice(small_res if len(small_res) > 50 else self.residuals,
-                                   size=1000, replace=True)
+            res = np.random.choice(
+                small_res if len(small_res) > 50 else self.residuals,
+                size=1000,
+                replace=True,
+            )
         else:
             res = np.zeros(1000)
         boot = np.clip(np.expm1(point + res), 1, None)
@@ -270,6 +321,7 @@ class RealDataPredictor:
 # Shared fixture — train model once per session
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture(scope="session")
 def trained_predictor() -> RealDataPredictor:
     """Train the ensemble on real JoSAA data once per test session."""
@@ -278,15 +330,29 @@ def trained_predictor() -> RealDataPredictor:
     mae = predictor.train(df)
     # Model trained — MAE is logged but not asserted here
     # (individual tests assert ±500 rank accuracy per the plan)
-    print(f"\n[fixture] RealDataPredictor trained | MAE on training set: {mae:.1f} ranks")
+    print(
+        f"\n[fixture] RealDataPredictor trained | MAE on training set: {mae:.1f} ranks"
+    )
     return predictor
 
 
-def _get_lag(df: pd.DataFrame, college: str, branch: str, category: str,
-             quota: str, gender: str, year: int) -> float:
-    row = df[(df.college_code == college) & (df.branch_code == branch) &
-             (df.category == category) & (df.quota == quota) &
-             (df.gender == gender) & (df.year == year)]
+def _get_lag(
+    df: pd.DataFrame,
+    college: str,
+    branch: str,
+    category: str,
+    quota: str,
+    gender: str,
+    year: int,
+) -> float:
+    row = df[
+        (df.college_code == college)
+        & (df.branch_code == branch)
+        & (df.category == category)
+        & (df.quota == quota)
+        & (df.gender == gender)
+        & (df.year == year)
+    ]
     if row.empty:
         return 5000.0
     return float(row.iloc[0]["closing_rank"])
@@ -319,18 +385,28 @@ class TestHistoricallyVerifiableJoSAAPredictions:
         Official JoSAA closing rank: 1,224
         Source: josaa.admissions.nic.in/applicant/SeatAllotmentResult/2024
         """
-        college, branch, category, quota, gender = "NIT_TRICHY", "CS", "GENERAL", "OS", "M"
+        college, branch, category, quota, gender = (
+            "NIT_TRICHY",
+            "CS",
+            "GENERAL",
+            "OS",
+            "M",
+        )
         lag_1 = _get_lag(self.df, college, branch, category, quota, gender, 2023)
         lag_2 = _get_lag(self.df, college, branch, category, quota, gender, 2022)
 
-        predicted, bootstrap = trained_predictor.predict(college, branch, category, quota, gender, lag_1, lag_2)
+        predicted, bootstrap = trained_predictor.predict(
+            college, branch, category, quota, gender, lag_1, lag_2
+        )
         official_2024 = 1224
 
         p50 = int(np.percentile(bootstrap, 50))
         actual_error = abs(p50 - official_2024)
 
-        print(f"\n[Test 1] NIT Trichy CSE GENERAL OS 2024")
-        print(f"  Official: {official_2024} | Predicted P50: {p50} | Error: {actual_error}")
+        print("\n[Test 1] NIT Trichy CSE GENERAL OS 2024")
+        print(
+            f"  Official: {official_2024} | Predicted P50: {p50} | Error: {actual_error}"
+        )
         print(f"  Lags used: lag_1={lag_1}, lag_2={lag_2}")
 
         assert actual_error <= TOLERANCE, (
@@ -348,18 +424,28 @@ class TestHistoricallyVerifiableJoSAAPredictions:
         Official JoSAA closing rank: 622
         Source: josaa.admissions.nic.in/applicant/SeatAllotmentResult/2024
         """
-        college, branch, category, quota, gender = "NIT_WARANGAL", "CS", "OBC_NCL", "OS", "M"
+        college, branch, category, quota, gender = (
+            "NIT_WARANGAL",
+            "CS",
+            "OBC_NCL",
+            "OS",
+            "M",
+        )
         lag_1 = _get_lag(self.df, college, branch, category, quota, gender, 2023)
         lag_2 = _get_lag(self.df, college, branch, category, quota, gender, 2022)
 
-        predicted, bootstrap = trained_predictor.predict(college, branch, category, quota, gender, lag_1, lag_2)
+        predicted, bootstrap = trained_predictor.predict(
+            college, branch, category, quota, gender, lag_1, lag_2
+        )
         official_2024 = 622
 
         p50 = int(np.percentile(bootstrap, 50))
         actual_error = abs(p50 - official_2024)
 
-        print(f"\n[Test 2] NIT Warangal CSE OBC-NCL OS 2024")
-        print(f"  Official: {official_2024} | Predicted P50: {p50} | Error: {actual_error}")
+        print("\n[Test 2] NIT Warangal CSE OBC-NCL OS 2024")
+        print(
+            f"  Official: {official_2024} | Predicted P50: {p50} | Error: {actual_error}"
+        )
 
         assert actual_error <= TOLERANCE, (
             f"NIT Warangal CSE OBC 2024: predicted {p50}, official {official_2024}, "
@@ -375,18 +461,28 @@ class TestHistoricallyVerifiableJoSAAPredictions:
         Official JoSAA closing rank: 2,724
         Source: josaa.admissions.nic.in/applicant/SeatAllotmentResult/2024
         """
-        college, branch, category, quota, gender = "NIT_SURATHKAL", "CS", "GENERAL", "OS", "M"
+        college, branch, category, quota, gender = (
+            "NIT_SURATHKAL",
+            "CS",
+            "GENERAL",
+            "OS",
+            "M",
+        )
         lag_1 = _get_lag(self.df, college, branch, category, quota, gender, 2023)
         lag_2 = _get_lag(self.df, college, branch, category, quota, gender, 2022)
 
-        predicted, bootstrap = trained_predictor.predict(college, branch, category, quota, gender, lag_1, lag_2)
+        predicted, bootstrap = trained_predictor.predict(
+            college, branch, category, quota, gender, lag_1, lag_2
+        )
         official_2024 = 2724
 
         p50 = int(np.percentile(bootstrap, 50))
         actual_error = abs(p50 - official_2024)
 
-        print(f"\n[Test 3] NIT Surathkal CSE GENERAL OS 2024")
-        print(f"  Official: {official_2024} | Predicted P50: {p50} | Error: {actual_error}")
+        print("\n[Test 3] NIT Surathkal CSE GENERAL OS 2024")
+        print(
+            f"  Official: {official_2024} | Predicted P50: {p50} | Error: {actual_error}"
+        )
 
         assert actual_error <= TOLERANCE, (
             f"NIT Surathkal CSE 2024: predicted {p50}, official {official_2024}, "
@@ -402,18 +498,28 @@ class TestHistoricallyVerifiableJoSAAPredictions:
         Official JoSAA closing rank: 5,602
         Source: josaa.admissions.nic.in/applicant/SeatAllotmentResult/2024
         """
-        college, branch, category, quota, gender = "IIIT_ALLAHABAD", "CS", "GENERAL", "OS", "M"
+        college, branch, category, quota, gender = (
+            "IIIT_ALLAHABAD",
+            "CS",
+            "GENERAL",
+            "OS",
+            "M",
+        )
         lag_1 = _get_lag(self.df, college, branch, category, quota, gender, 2023)
         lag_2 = _get_lag(self.df, college, branch, category, quota, gender, 2022)
 
-        predicted, bootstrap = trained_predictor.predict(college, branch, category, quota, gender, lag_1, lag_2)
+        predicted, bootstrap = trained_predictor.predict(
+            college, branch, category, quota, gender, lag_1, lag_2
+        )
         official_2024 = 5602
 
         p50 = int(np.percentile(bootstrap, 50))
         actual_error = abs(p50 - official_2024)
 
-        print(f"\n[Test 4] IIIT Allahabad IT GENERAL OS 2024")
-        print(f"  Official: {official_2024} | Predicted P50: {p50} | Error: {actual_error}")
+        print("\n[Test 4] IIIT Allahabad IT GENERAL OS 2024")
+        print(
+            f"  Official: {official_2024} | Predicted P50: {p50} | Error: {actual_error}"
+        )
 
         assert actual_error <= TOLERANCE, (
             f"IIIT Allahabad IT 2024: predicted {p50}, official {official_2024}, "
@@ -429,18 +535,28 @@ class TestHistoricallyVerifiableJoSAAPredictions:
         Official JoSAA closing rank: 3,546
         Source: josaa.admissions.nic.in/applicant/SeatAllotmentResult/2024
         """
-        college, branch, category, quota, gender = "NIT_TRICHY", "EC", "GENERAL", "OS", "M"
+        college, branch, category, quota, gender = (
+            "NIT_TRICHY",
+            "EC",
+            "GENERAL",
+            "OS",
+            "M",
+        )
         lag_1 = _get_lag(self.df, college, branch, category, quota, gender, 2023)
         lag_2 = _get_lag(self.df, college, branch, category, quota, gender, 2022)
 
-        predicted, bootstrap = trained_predictor.predict(college, branch, category, quota, gender, lag_1, lag_2)
+        predicted, bootstrap = trained_predictor.predict(
+            college, branch, category, quota, gender, lag_1, lag_2
+        )
         official_2024 = 3546
 
         p50 = int(np.percentile(bootstrap, 50))
         actual_error = abs(p50 - official_2024)
 
-        print(f"\n[Test 5] NIT Trichy ECE GENERAL OS 2024")
-        print(f"  Official: {official_2024} | Predicted P50: {p50} | Error: {actual_error}")
+        print("\n[Test 5] NIT Trichy ECE GENERAL OS 2024")
+        print(
+            f"  Official: {official_2024} | Predicted P50: {p50} | Error: {actual_error}"
+        )
 
         assert actual_error <= TOLERANCE, (
             f"NIT Trichy ECE 2024: predicted {p50}, official {official_2024}, "
@@ -451,6 +567,7 @@ class TestHistoricallyVerifiableJoSAAPredictions:
 # ---------------------------------------------------------------------------
 # Accuracy Coverage Test — ensures ≥80% of all 5 tests pass ±500
 # ---------------------------------------------------------------------------
+
 
 def test_overall_accuracy_target() -> None:
     """Aggregate accuracy test: ≥80% of the 5 benchmark points must be within ±500 ranks.
@@ -481,19 +598,29 @@ def test_overall_accuracy_target() -> None:
         passed = err <= TOLERANCE
         if passed:
             within_tolerance += 1
-        results.append({
-            "college": college, "branch": branch, "cat": cat,
-            "official": official, "predicted_p50": p50, "error": err, "passed": passed
-        })
+        results.append(
+            {
+                "college": college,
+                "branch": branch,
+                "cat": cat,
+                "official": official,
+                "predicted_p50": p50,
+                "error": err,
+                "passed": passed,
+            }
+        )
 
     accuracy = within_tolerance / len(benchmarks)
-    print(f"\n[Overall Accuracy] {within_tolerance}/{len(benchmarks)} within ±{TOLERANCE} = {accuracy:.0%}")
+    print(
+        f"\n[Overall Accuracy] {within_tolerance}/{len(benchmarks)} within ±{TOLERANCE} = {accuracy:.0%}"
+    )
     for r in results:
         status = "✓" if r["passed"] else "✗"
-        print(f"  {status} {r['college']} {r['branch']} {r['cat']}: "
-              f"official={r['official']}, p50={r['predicted_p50']}, err={r['error']}")
+        print(
+            f"  {status} {r['college']} {r['branch']} {r['cat']}: "
+            f"official={r['official']}, p50={r['predicted_p50']}, err={r['error']}"
+        )
 
     assert accuracy >= 0.80, (
-        f"Overall accuracy {accuracy:.0%} below 80% target. "
-        f"Results: {results}"
+        f"Overall accuracy {accuracy:.0%} below 80% target. " f"Results: {results}"
     )

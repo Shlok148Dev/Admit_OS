@@ -1,0 +1,11 @@
+apiVersion: v2
+name: admitos
+description: Helm chart for ADMIT OS microservices stack on Google Kubernetes Engine (GKE)
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - admitos
+  - gke
+  - microservices
+  - fastapi

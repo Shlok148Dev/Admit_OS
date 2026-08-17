@@ -1,4 +1,8 @@
-# Environment and virtual environments
+# ==============================================================================
+# Admit OS — Root .gitignore
+# ==============================================================================
+
+# Environment and Virtual Environments
 .venv/
 venv/
 env/
@@ -6,8 +10,11 @@ ENV/
 .env
 .env.local
 .env.*.local
+.env.development
+.env.test
+.env.production
 
-# Python
+# Python Cache & Bytecode
 __pycache__/
 *.py[cod]
 *$py.class
@@ -23,7 +30,6 @@ lib/
 lib64/
 parts/
 sdist/
-var/
 wheels/
 *.egg-info/
 .installed.cfg
@@ -31,62 +37,78 @@ wheels/
 .pytest_cache/
 .coverage
 htmlcov/
+.mypy_cache/
+.ruff_cache/
 
-# Node and npm
+# Node, Next.js & Frontend Artifacts
 node_modules/
-npm-debug.log
-yarn-error.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
 .next/
 out/
-.nuxt
-dist/
+.nuxt/
+*.tsbuildinfo
+.turbo/
+.expo/
+.expo-shared/
 
-# IDE
+# IDE & Editor Files
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 .DS_Store
+Thumbs.db
 
-# MLflow and ML artifacts
+# Machine Learning & Model Artifacts
 mlruns/
 *.pkl
 *.joblib
+*.onnx
+*.pt
+*.bin
 models/artifacts/
 
-# Logs
-logs/
-*.log
-
-# Database and local data
+# Database & Local Storage (NEVER COMMIT DATABASES OR RAW PDF DUMPS)
 *.db
 *.sqlite
 *.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
+data/
 data/local/
+data/sqlite/
+data/raw/
 
-# Secrets and credentials (never commit these!)
+# Secrets, Certificates & API Keys
 secrets/
 *.pem
 *.key
+*.crt
 .credentials
 auth_token
 api_keys.json
+service_account.json
+firebase-adminsdk*.json
 
-# Build artifacts
-dist/
-build/
-*.tar.gz
-*.zip
+# Logs & Telemetry
+logs/
+*.log
+npm-debug.log*
 
-# Local testing
+# Test Transcripts, Browser Dumps & Local Benchmarks
+*transcript*.json
+*results*.json
+*report*.json
+live_screenshots/
+.tempmediaStorage/
 test_output/
 temp/
 tmp/
-
-# OS
-.DS_Store
-Thumbs.db
 
 # Terraform
 terraform/.terraform/
@@ -94,10 +116,26 @@ terraform/*.tfstate
 terraform/*.tfstate.backup
 terraform/.terraform.lock.hcl
 
-# Docker
+# Docker overrides
 docker-compose.override.yml
 
-# Misc local files
+# Scratch & Temporary Notes
 scratch/
 search_results.txt
 RESULTS.md
+
+# Conversational Scratch Runners & Diagnostic Scripts
+run_*.py
+validate_*.py
+test_aria_*.py
+test_10_*.py
+test_4x_*.py
+test_5x_*.py
+test_category_*.py
+test_enterprise_*.py
+test_final_*.py
+test_jee_*.py
+test_p0_*.py
+test_rank_radar_*.py
+format_full_*.py
+db_fix_exams.py

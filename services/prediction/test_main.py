@@ -3,10 +3,12 @@ from services.prediction.main import app
 
 client = TestClient(app)
 
+
 def test_health_check():
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json() == {"status": "healthy", "service": "prediction-service"}
+
 
 def test_predict_college():
     payload = {
@@ -21,8 +23,8 @@ def test_predict_college():
             "branches": ["CS"],
             "college_types": ["NIT"],
             "states": ["MH", "TN"],
-            "max_fees_per_year": 200000
-        }
+            "max_fees_per_year": 200000,
+        },
     }
     response = client.post("/v1/predict/college", json=payload)
     assert response.status_code == 200

@@ -15,9 +15,15 @@ def setup_seo_test_db():
 
 def test_seo_generator_runs_and_generates_files():
     """Verify that the SEO generator runs and creates three JSON files."""
-    colleges_path = os.path.join("frontend", "web", "src", "lib", "seo_data", "colleges.json")
-    cutoffs_path = os.path.join("frontend", "web", "src", "lib", "seo_data", "cutoffs.json")
-    guides_path = os.path.join("frontend", "web", "src", "lib", "seo_data", "guides.json")
+    colleges_path = os.path.join(
+        "frontend", "web", "src", "lib", "seo_data", "colleges.json"
+    )
+    cutoffs_path = os.path.join(
+        "frontend", "web", "src", "lib", "seo_data", "cutoffs.json"
+    )
+    guides_path = os.path.join(
+        "frontend", "web", "src", "lib", "seo_data", "guides.json"
+    )
 
     # Run generator
     c_len, cut_len, g_len = generate_seo_params()
@@ -55,8 +61,10 @@ def test_seo_generator_max_colleges_constraint():
     """Verify the MAX_SEO_COLLEGES env variable strictly limits page output."""
     os.environ["MAX_SEO_COLLEGES"] = "1"
     generate_seo_params()
-    
-    colleges_path = os.path.join("frontend", "web", "src", "lib", "seo_data", "colleges.json")
+
+    colleges_path = os.path.join(
+        "frontend", "web", "src", "lib", "seo_data", "colleges.json"
+    )
     with open(colleges_path, "r", encoding="utf-8") as f:
         colleges = json.load(f)
         assert len(colleges) <= 1
@@ -97,7 +105,9 @@ def test_sitemap_correctness():
 
 def test_og_image_route_exists_and_uses_image_response():
     """Verify route.tsx for OG image exists and imports next/og ImageResponse."""
-    og_route_path = os.path.join("frontend", "web", "src", "app", "api", "og", "route.tsx")
+    og_route_path = os.path.join(
+        "frontend", "web", "src", "app", "api", "og", "route.tsx"
+    )
     assert os.path.exists(og_route_path)
 
     with open(og_route_path, "r", encoding="utf-8") as f:

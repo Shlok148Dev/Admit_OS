@@ -13,7 +13,9 @@ logger: logging.Logger = logging.getLogger("analytics_service.database")
 
 DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./admitos_prediction.db")
 if DATABASE_URL.startswith("postgresql"):
-    DATABASE_URL = DATABASE_URL.replace("?prepared_statement_cache_size=0", "").replace("&prepared_statement_cache_size=0", "")
+    DATABASE_URL = DATABASE_URL.replace("?prepared_statement_cache_size=0", "").replace(
+        "&prepared_statement_cache_size=0", ""
+    )
 connect_args = {}
 engine_args = {}
 if DATABASE_URL.startswith("sqlite"):
@@ -25,7 +27,7 @@ else:
         "max_overflow": 5,
         "pool_timeout": 30,
         "pool_recycle": 1800,
-        "pool_pre_ping": True
+        "pool_pre_ping": True,
     }
 
 try:
@@ -37,6 +39,7 @@ except Exception as e:
 
 Base = declarative_base()
 
+
 def init_db() -> None:
     """Initialize database tables."""
     try:
@@ -45,6 +48,7 @@ def init_db() -> None:
     except Exception as e:
         logger.error(f"Failed to initialize analytics tables: {e}", exc_info=True)
         raise
+
 
 def get_db() -> Generator[Session, None, None]:
     """Dependency injection for database sessions."""

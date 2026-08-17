@@ -11,7 +11,12 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 from services.prediction.database import (
-    engine, Base, College, ExamCutoff, Guide, SessionLocal
+    engine,
+    Base,
+    College,
+    ExamCutoff,
+    Guide,
+    SessionLocal,
 )
 
 # Configure logger
@@ -25,36 +30,36 @@ DEFAULT_GUIDES = [
         "title": "JoSAA Choice Filling Strategy Guide 2026",
         "description": "Step-by-step strategy to optimize your JEE choices.",
         "category": "engineering",
-        "content": "Learn how to build your choice-filling list. Balance reaches and safeties."
+        "content": "Learn how to build your choice-filling list. Balance reaches and safeties.",
     },
     {
         "slug": "neet-counseling-checklist-2026",
         "title": "NEET UG Counseling Checklist & Guidelines 2026",
         "description": "Essential documents and timelines for NEET admissions.",
         "category": "medical",
-        "content": "A complete list of documents required for MCC reporting."
+        "content": "A complete list of documents required for MCC reporting.",
     },
     {
         "slug": "mht-cet-choice-filling-tips",
         "title": "MHT-CET Counseling: Avoid These Common Mistakes",
         "description": "Mistakes to avoid when selecting colleges in DTE Maharashtra.",
         "category": "engineering",
-        "content": "Tips on TFWS schemes, round-wise upgrades, and state seat matrix rules."
+        "content": "Tips on TFWS schemes, round-wise upgrades, and state seat matrix rules.",
     },
     {
         "slug": "bitsat-counseling-procedure",
         "title": "BITSAT 2026 Iterations & Counseling Overview",
         "description": "Understand BITS iterations, waitlist rules, and fee refunds.",
         "category": "engineering",
-        "content": "A detailed look at Pilani, Goa, and Hyderabad campus iteration schemes."
+        "content": "A detailed look at Pilani, Goa, and Hyderabad campus iteration schemes.",
     },
     {
         "slug": "kcet-document-verification-guide",
         "title": "KCET Document Verification & Eligibility Clauses",
         "description": "A comprehensive guide on clauses A through O in KCET.",
         "category": "engineering",
-        "content": "Important checklist for Karnataka examinations authority counseling."
-    }
+        "content": "Important checklist for Karnataka examinations authority counseling.",
+    },
 ]
 
 
@@ -99,10 +104,15 @@ def get_max_colleges() -> int:
 def query_colleges(db: Session, limit: int) -> List[str]:
     """Retrieve top N college codes based on database records."""
     try:
-        colleges = db.query(College.college_code).order_by(
-            College.nirf_rank_engineering.asc().nullslast(),
-            College.college_code.asc()
-        ).limit(limit).all()
+        colleges = (
+            db.query(College.college_code)
+            .order_by(
+                College.nirf_rank_engineering.asc().nullslast(),
+                College.college_code.asc(),
+            )
+            .limit(limit)
+            .all()
+        )
         return [c[0] for c in colleges]
     except Exception as e:
         logger.error(f"Failed to query colleges: {e}", exc_info=True)
@@ -112,26 +122,30 @@ def query_colleges(db: Session, limit: int) -> List[str]:
 def query_top_branches_and_categories(db: Session) -> Tuple[List[str], List[str]]:
     """Retrieve top 5 branches and top 3 categories by frequency in cutoffs."""
     try:
-        branch_query = db.query(
-            ExamCutoff.branch_code, func.count(ExamCutoff.id)
-        ).group_by(ExamCutoff.branch_code).order_by(
-            func.count(ExamCutoff.id).desc()
-        ).limit(5).all()
+        branch_query = (
+            db.query(ExamCutoff.branch_code, func.count(ExamCutoff.id))
+            .group_by(ExamCutoff.branch_code)
+            .order_by(func.count(ExamCutoff.id).desc())
+            .limit(5)
+            .all()
+        )
         branches = [b[0] for b in branch_query]
-        
-        cat_query = db.query(
-            ExamCutoff.category, func.count(ExamCutoff.id)
-        ).group_by(ExamCutoff.category).order_by(
-            func.count(ExamCutoff.id).desc()
-        ).limit(3).all()
+
+        cat_query = (
+            db.query(ExamCutoff.category, func.count(ExamCutoff.id))
+            .group_by(ExamCutoff.category)
+            .order_by(func.count(ExamCutoff.id).desc())
+            .limit(3)
+            .all()
+        )
         categories = [c[0] for c in cat_query]
-        
+
         # Fallbacks if database is empty/sparse
         if not branches:
             branches = ["CS", "EC", "ME", "EE", "CE"]
         if not categories:
             categories = ["GENERAL", "OBC_NCL", "SC"]
-            
+
         return branches, categories
     except Exception as e:
         logger.error(f"Failed to query branches and categories: {e}", exc_info=True)
@@ -143,25 +157,29 @@ def query_cutoffs(
 ) -> List[Dict[str, str]]:
     """Query combinations of cutoffs that exist in the database."""
     try:
-        cutoffs = db.query(
-            ExamCutoff.college_code, ExamCutoff.branch_code, ExamCutoff.category
-        ).filter(
-            ExamCutoff.college_code.in_(colleges),
-            ExamCutoff.branch_code.in_(branches),
-            ExamCutoff.category.in_(categories)
-        ).distinct().all()
-        
+        cutoffs = (
+            db.query(
+                ExamCutoff.college_code, ExamCutoff.branch_code, ExamCutoff.category
+            )
+            .filter(
+                ExamCutoff.college_code.in_(colleges),
+                ExamCutoff.branch_code.in_(branches),
+                ExamCutoff.category.in_(categories),
+            )
+            .distinct()
+            .all()
+        )
+
         # Fallback to Cartesian product if no records are found in test db
         if not cutoffs:
             return [
                 {"college": col, "branch": br, "category": cat}
-                for col in colleges for br in branches for cat in categories
+                for col in colleges
+                for br in branches
+                for cat in categories
             ]
-            
-        return [
-            {"college": c[0], "branch": c[1], "category": c[2]}
-            for c in cutoffs
-        ]
+
+        return [{"college": c[0], "branch": c[1], "category": c[2]} for c in cutoffs]
     except Exception as e:
         logger.error(f"Failed to query cutoffs: {e}", exc_info=True)
         return []
@@ -192,7 +210,7 @@ def generate_seo_params() -> Tuple[int, int, int]:
     """Main orchestration function to run the SEO params generation."""
     init_seo_database()
     max_colleges = get_max_colleges()
-    
+
     db: Session = SessionLocal()
     try:
         colleges = query_colleges(db, max_colleges)
@@ -201,18 +219,16 @@ def generate_seo_params() -> Tuple[int, int, int]:
         guides = query_guides(db)
     finally:
         db.close()
-        
-    out_dir = os.path.join(
-        "frontend", "web", "src", "lib", "seo_data"
-    )
-    
+
+    out_dir = os.path.join("frontend", "web", "src", "lib", "seo_data")
+
     college_params = [{"code": code} for code in colleges]
     guide_params = [{"slug": slug} for slug in guides]
-    
+
     write_json_output(os.path.join(out_dir, "colleges.json"), college_params)
     write_json_output(os.path.join(out_dir, "cutoffs.json"), cutoffs)
     write_json_output(os.path.join(out_dir, "guides.json"), guide_params)
-    
+
     return len(college_params), len(cutoffs), len(guide_params)
 
 

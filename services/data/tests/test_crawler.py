@@ -30,7 +30,9 @@ def test_check_and_process_page_no_change(crawler: WebCrawlerAgent) -> None:
     crawler.publish_to_kafka = MagicMock()  # type: ignore[method-assign]
 
     prev_hash = crawler.calculate_hash("<html>Same Content</html>")
-    result = crawler.check_and_process_page("http://example.com/josaa", "JEE_MAIN", prev_hash)
+    result = crawler.check_and_process_page(
+        "http://example.com/josaa", "JEE_MAIN", prev_hash
+    )
 
     assert result is None
     crawler.publish_to_kafka.assert_not_called()
@@ -42,7 +44,9 @@ def test_check_and_process_page_with_change(crawler: WebCrawlerAgent) -> None:
     crawler.publish_to_kafka = MagicMock()  # type: ignore[method-assign]
 
     prev_hash = crawler.calculate_hash("<html>Old Content</html>")
-    result = crawler.check_and_process_page("http://example.com/josaa", "JEE_MAIN", prev_hash)
+    result = crawler.check_and_process_page(
+        "http://example.com/josaa", "JEE_MAIN", prev_hash
+    )
 
     new_hash = crawler.calculate_hash("<html>New Content</html>")
     assert result == new_hash

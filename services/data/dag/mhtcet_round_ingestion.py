@@ -13,6 +13,7 @@ from typing import Any
 try:
     from airflow import DAG  # type: ignore[import]
     from airflow.operators.python import PythonOperator
+
     AIRFLOW_AVAILABLE = True
 except ImportError:
     AIRFLOW_AVAILABLE = False
@@ -39,6 +40,7 @@ DEFAULT_ARGS = {
 def task_crawl_mhtcet(**context: Any) -> str:
     """Task 1: Crawl DTE Maharashtra portal for new documents."""
     from services.data.crawler.web_crawler import WebCrawlerAgent
+
     agent = WebCrawlerAgent("mhtcet-dag-crawler")
     results = []
     for url in MHTCET_URLS:
@@ -52,7 +54,6 @@ def task_crawl_mhtcet(**context: Any) -> str:
 def task_fetch_mhtcet_pdfs(**context: Any) -> str:
     """Task 2: Download MHT-CET cutoff PDFs from portal."""
     import httpx
-    import glob
 
     out_dir = "/tmp/mhtcet_pdfs"
     os.makedirs(out_dir, exist_ok=True)
@@ -61,7 +62,9 @@ def task_fetch_mhtcet_pdfs(**context: Any) -> str:
         try:
             with httpx.Client(timeout=30.0, follow_redirects=True) as client:
                 resp = client.get(url)
-                if resp.status_code == 200 and "pdf" in resp.headers.get("content-type", ""):
+                if resp.status_code == 200 and "pdf" in resp.headers.get(
+                    "content-type", ""
+                ):
                     fname = os.path.join(out_dir, os.path.basename(url) + ".pdf")
                     with open(fname, "wb") as f:
                         f.write(resp.content)
@@ -134,12 +137,16 @@ def task_load_mhtcet_to_db(**context: Any) -> None:
 def task_publish_mhtcet_kafka(**context: Any) -> None:
     """Task 5: Publish ValidatedGroundTruth event to Kafka."""
     from services.data.crawler.web_crawler import WebCrawlerAgent
+
     agent = WebCrawlerAgent("mhtcet-dag-publisher")
-    agent.publish_to_kafka("data.validated.ground_truth", {
-        "exam_type": "MHT_CET",
-        "timestamp": datetime.utcnow().isoformat() + "Z",
-        "status": "completed",
-    })
+    agent.publish_to_kafka(
+        "data.validated.ground_truth",
+        {
+            "exam_type": "MHT_CET",
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "status": "completed",
+        },
+    )
 
 
 if AIRFLOW_AVAILABLE:
@@ -153,10 +160,20 @@ if AIRFLOW_AVAILABLE:
         tags=["mhtcet", "ingestion", "cutoff"],
     ) as dag:
 
-        crawl = PythonOperator(task_id="crawl_mhtcet_portal", python_callable=task_crawl_mhtcet)
-        fetch = PythonOperator(task_id="fetch_mhtcet_pdfs", python_callable=task_fetch_mhtcet_pdfs)
-        extract = PythonOperator(task_id="extract_tables", python_callable=task_extract_mhtcet_tables)
-        load = PythonOperator(task_id="load_to_db", python_callable=task_load_mhtcet_to_db)
-        publish = PythonOperator(task_id="publish_kafka", python_callable=task_publish_mhtcet_kafka)
+        crawl = PythonOperator(
+            task_id="crawl_mhtcet_portal", python_callable=task_crawl_mhtcet
+        )
+        fetch = PythonOperator(
+            task_id="fetch_mhtcet_pdfs", python_callable=task_fetch_mhtcet_pdfs
+        )
+        extract = PythonOperator(
+            task_id="extract_tables", python_callable=task_extract_mhtcet_tables
+        )
+        load = PythonOperator(
+            task_id="load_to_db", python_callable=task_load_mhtcet_to_db
+        )
+        publish = PythonOperator(
+            task_id="publish_kafka", python_callable=task_publish_mhtcet_kafka
+        )
 
         crawl >> fetch >> extract >> load >> publish

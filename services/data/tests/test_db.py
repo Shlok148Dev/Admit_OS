@@ -56,9 +56,7 @@ def test_schema_has_exam_cutoffs_rank_constraint(schema_content: str) -> None:
     table_pattern = r"CREATE TABLE\s+(IF NOT EXISTS\s+)?exam_cutoffs\s*\("
     assert re.search(table_pattern, schema_content, re.IGNORECASE) is not None
 
-    constraint_pattern = (
-        r"CONSTRAINT\s+chk_closing_rank_gte_opening\s+CHECK\s*\(\s*closing_rank\s*>=\s*opening_rank\s*\)"
-    )
+    constraint_pattern = r"CONSTRAINT\s+chk_closing_rank_gte_opening\s+CHECK\s*\(\s*closing_rank\s*>=\s*opening_rank\s*\)"
     assert re.search(constraint_pattern, schema_content, re.IGNORECASE) is not None
 
 
@@ -68,9 +66,7 @@ def test_schema_has_student_profiles_ssn_constraint(schema_content: str) -> None
     assert re.search(table_pattern, schema_content, re.IGNORECASE) is not None
 
     # Verify no ssn constraint in preferences column
-    constraint_pattern = (
-        r"CONSTRAINT\s+no_sensitive_data\s+CHECK\s*\(\s*preferences::text\s+NOT\s+LIKE\s+'%\"ssn\"%'\s*\)"
-    )
+    constraint_pattern = r"CONSTRAINT\s+no_sensitive_data\s+CHECK\s*\(\s*preferences::text\s+NOT\s+LIKE\s+'%\"ssn\"%'\s*\)"
     assert re.search(constraint_pattern, schema_content, re.IGNORECASE) is not None
 
 

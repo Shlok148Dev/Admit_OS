@@ -1,0 +1,123 @@
+# ADMIT OS Helm Chart Values
+# Note: Plaintext secrets are NEVER stored here. Production environments pull from GCP Secret Manager.
+
+global:
+  environment: production
+  domain: admitos.in
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# Microservices Config
+services:
+  auth:
+    name: auth-service
+    replicaCount: 2
+    image:
+      repository: gcr.io/admitos-prod/auth-service
+      tag: "1.0.0"
+      pullPolicy: IfNotPresent
+    port: 8000
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 10
+      targetCPUUtilizationPercentage: 75
+
+  prediction:
+    name: prediction-service
+    replicaCount: 2
+    image:
+      repository: gcr.io/admitos-prod/prediction-service
+      tag: "1.0.0"
+      pullPolicy: IfNotPresent
+    port: 8001
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+      requests:
+        cpu: 250m
+        memory: 256Mi
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 15
+      targetCPUUtilizationPercentage: 70
+
+  counseling:
+    name: counseling-service
+    replicaCount: 2
+    image:
+      repository: gcr.io/admitos-prod/counseling-service
+      tag: "1.0.0"
+      pullPolicy: IfNotPresent
+    port: 8002
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+      requests:
+        cpu: 250m
+        memory: 256Mi
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 10
+      targetCPUUtilizationPercentage: 75
+
+  notification:
+    name: notification-service
+    replicaCount: 2
+    image:
+      repository: gcr.io/admitos-prod/notification-service
+      tag: "1.0.0"
+      pullPolicy: IfNotPresent
+    port: 8003
+    resources:
+      limits:
+        cpu: 250m
+        memory: 256Mi
+      requests:
+        cpu: 50m
+        memory: 64Mi
+
+  career:
+    name: career-service
+    replicaCount: 2
+    image:
+      repository: gcr.io/admitos-prod/career-service
+      tag: "1.0.0"
+      pullPolicy: IfNotPresent
+    port: 8004
+    resources:
+      limits:
+        cpu: 250m
+        memory: 256Mi
+      requests:
+        cpu: 50m
+        memory: 64Mi
+
+  analytics:
+    name: analytics-service
+    replicaCount: 2
+    image:
+      repository: gcr.io/admitos-prod/analytics-service
+      tag: "1.0.0"
+      pullPolicy: IfNotPresent
+    port: 8005
+    resources:
+      limits:
+        cpu: 250m
+        memory: 256Mi
+      requests:
+        cpu: 50m
+        memory: 64Mi

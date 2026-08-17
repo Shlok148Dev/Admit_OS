@@ -2,6 +2,7 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 from services.career.models import Scholarship
 
+
 def find_scholarships(
     db: Session,
     category: Optional[str] = None,
@@ -9,11 +10,11 @@ def find_scholarships(
     gender: Optional[str] = None,
     income: Optional[float] = None,
     limit: int = 20,
-    offset: int = 0
+    offset: int = 0,
 ) -> List[Scholarship]:
     results = db.query(Scholarship).all()
     filtered = []
-    
+
     for s in results:
         if category and s.eligible_categories:
             if category.upper() not in [c.upper() for c in s.eligible_categories]:
@@ -28,5 +29,5 @@ def find_scholarships(
             if income > float(s.max_family_income):
                 continue
         filtered.append(s)
-        
-    return filtered[offset:offset+limit]
+
+    return filtered[offset : offset + limit]

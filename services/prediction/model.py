@@ -12,36 +12,63 @@ import lightgbm as lgb
 from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error
 import mlflow.pyfunc
 
-
 logger: logging.Logger = logging.getLogger("prediction_service.model")
 
 COLLEGE_MAP: Dict[str, int] = {
-    val: idx for idx, val in enumerate([
-        "IIT_BOMBAY", "IIT_DELHI", "IIT_MADRAS", "NIT_TRICHY", "NIT_SURATHKAL",
-        "IIIT_ALLAHABAD", "IIIT_DELHI", "COEP_PUNE", "VJTI_MUMBAI", "ICT_MUMBAI"
-    ])
+    val: idx
+    for idx, val in enumerate(
+        [
+            "IIT_BOMBAY",
+            "IIT_DELHI",
+            "IIT_MADRAS",
+            "NIT_TRICHY",
+            "NIT_SURATHKAL",
+            "IIIT_ALLAHABAD",
+            "IIIT_DELHI",
+            "COEP_PUNE",
+            "VJTI_MUMBAI",
+            "ICT_MUMBAI",
+        ]
+    )
 }
 BRANCH_MAP: Dict[str, int] = {"CS": 0, "EC": 1, "ME": 2}
 CAT_MAP: Dict[str, int] = {"GENERAL": 0, "OBC_NCL": 1, "SC": 2, "ST": 3, "EWS": 4}
 QUOTA_MAP: Dict[str, int] = {"OS": 0, "HS": 1}
 GENDER_MAP: Dict[str, int] = {"M": 0, "F": 1}
 
+
 def get_cutoff_rank(
     college: str, branch: str, cat: str, quota: str, gender: str, year: int
 ) -> int:
     """Calculate synthetic rank based on college, branch, category, quota, gender, year."""
     bases: Dict[str, int] = {
-        "IIT_BOMBAY": 100, "IIT_DELHI": 150, "IIT_MADRAS": 200, "NIT_TRICHY": 800,
-        "NIT_SURATHKAL": 1000, "IIIT_ALLAHABAD": 1500, "IIIT_DELHI": 1800,
-        "COEP_PUNE": 2500, "VJTI_MUMBAI": 3000, "ICT_MUMBAI": 3500
+        "IIT_BOMBAY": 100,
+        "IIT_DELHI": 150,
+        "IIT_MADRAS": 200,
+        "NIT_TRICHY": 800,
+        "NIT_SURATHKAL": 1000,
+        "IIIT_ALLAHABAD": 1500,
+        "IIIT_DELHI": 1800,
+        "COEP_PUNE": 2500,
+        "VJTI_MUMBAI": 3000,
+        "ICT_MUMBAI": 3500,
     }
     base = bases.get(college, 1000)
     branch_mult = {"CS": 1.0, "EC": 1.8, "ME": 3.0}.get(branch, 1.0)
-    cat_mult = {"GENERAL": 1.0, "OBC_NCL": 2.5, "SC": 6.0, "ST": 8.0, "EWS": 1.5}.get(cat, 1.0)
+    cat_mult = {"GENERAL": 1.0, "OBC_NCL": 2.5, "SC": 6.0, "ST": 8.0, "EWS": 1.5}.get(
+        cat, 1.0
+    )
     quota_mult = {"OS": 1.0, "HS": 1.3}.get(quota, 1.0)
     gender_mult = {"M": 1.0, "F": 1.2}.get(gender, 1.0)
-    year_noise = 1.0 + 0.02 * (year - 2020) + 0.02 * np.random.randn()
+
+    # Hash-based deterministic noise to prevent inconsistent runs
+    import hashlib
+    param_str = f"{college}_{branch}_{cat}_{quota}_{gender}_{year}"
+    h = int(hashlib.md5(param_str.encode('utf-8')).hexdigest(), 16)
+    deterministic_noise = ((h % 2000) - 1000) / 1000.0
+    year_noise = 1.0 + 0.02 * (year - 2020) + 0.02 * deterministic_noise
     return int(base * branch_mult * cat_mult * quota_mult * gender_mult * year_noise)
+
 
 def generate_synthetic_cutoffs() -> pd.DataFrame:
     """Generate 10 colleges x 5 years synthetic cutoff data."""
@@ -51,7 +78,7 @@ def generate_synthetic_cutoffs() -> pd.DataFrame:
     quotas = list(QUOTA_MAP.keys())
     genders = list(GENDER_MAP.keys())
     years = [2020, 2021, 2022, 2023, 2024]
-    
+
     np.random.seed(42)
     records = []
     for col in colleges:
@@ -61,30 +88,63 @@ def generate_synthetic_cutoffs() -> pd.DataFrame:
                     for g in genders:
                         for y in years:
                             rank = get_cutoff_rank(col, br, cat, q, g, y)
-                            records.append({
-                                "college_code": col, "branch_code": br, "category": cat,
-                                "quota": q, "gender": g, "year": y, "closing_rank": rank,
-                                "opening_rank": int(rank * 0.85)
-                            })
+                            records.append(
+                                {
+                                    "college_code": col,
+                                    "branch_code": br,
+                                    "category": cat,
+                                    "quota": q,
+                                    "gender": g,
+                                    "year": y,
+                                    "closing_rank": rank,
+                                    "opening_rank": int(rank * 0.85),
+                                }
+                            )
     return pd.DataFrame(records)
+
 
 def add_lags(df: pd.DataFrame) -> pd.DataFrame:
     """Add lag features (lag_1, lag_2) to the dataframe."""
     df_lag1 = df[
-        ["college_code", "branch_code", "category", "quota", "gender", "year", "closing_rank"]
+        [
+            "college_code",
+            "branch_code",
+            "category",
+            "quota",
+            "gender",
+            "year",
+            "closing_rank",
+        ]
     ].copy()
     df_lag1["year"] = df_lag1["year"] + 1
     df_lag1 = df_lag1.rename(columns={"closing_rank": "lag_1"})
-    
+
     df_lag2 = df[
-        ["college_code", "branch_code", "category", "quota", "gender", "year", "closing_rank"]
+        [
+            "college_code",
+            "branch_code",
+            "category",
+            "quota",
+            "gender",
+            "year",
+            "closing_rank",
+        ]
     ].copy()
     df_lag2["year"] = df_lag2["year"] + 2
     df_lag2 = df_lag2.rename(columns={"closing_rank": "lag_2"})
-    
-    merged = pd.merge(df, df_lag1, on=["college_code", "branch_code", "category", "quota", "gender", "year"])
-    merged = pd.merge(merged, df_lag2, on=["college_code", "branch_code", "category", "quota", "gender", "year"])
+
+    merged = pd.merge(
+        df,
+        df_lag1,
+        on=["college_code", "branch_code", "category", "quota", "gender", "year"],
+    )
+    merged = pd.merge(
+        merged,
+        df_lag2,
+        on=["college_code", "branch_code", "category", "quota", "gender", "year"],
+    )
     return merged
+
 
 def encode_df(df: pd.DataFrame) -> pd.DataFrame:
     """Encode categorical columns to numeric."""
@@ -96,28 +156,35 @@ def encode_df(df: pd.DataFrame) -> pd.DataFrame:
     encoded["gender_enc"] = encoded["gender"].map(GENDER_MAP)
     return encoded
 
+
 def compute_bootstrap_intervals(
-    bootstrap_preds: np.ndarray,
-    student_rank: int
+    bootstrap_preds: np.ndarray, student_rank: int
 ) -> Tuple[int, int, int, float]:
     """Compute P10, P50, P90 and student admission probability."""
     p10 = int(np.percentile(bootstrap_preds, 10))
     p50 = int(np.percentile(bootstrap_preds, 50))
     p90 = int(np.percentile(bootstrap_preds, 90))
-    
+
     p10 = max(1, p10)
     p50 = max(p10, p50)
     p90 = max(p50, p90)
-    
+
     prob = float(np.mean(bootstrap_preds >= student_rank))
     prob = round(max(0.0, min(1.0, prob)), 2)
     return p10, p50, p90, prob
+
 
 class CutoffPredictor:
     """XGBoost + LightGBM Ensemble Predictor for cutoff ranks."""
 
     def __init__(self) -> None:
-        self.xgb_model = xgb.XGBRegressor(n_estimators=100, max_depth=4, random_state=42)
+        import os
+        env = os.getenv("ENVIRONMENT", "").strip().lower()
+        if env not in ("development", "test"):
+            raise RuntimeError("Synthetic CutoffPredictor instantiation is blocked in production environments.")
+        self.xgb_model = xgb.XGBRegressor(
+            n_estimators=100, max_depth=4, random_state=42
+        )
         self.lgb_model = lgb.LGBMRegressor(
             n_estimators=100, max_depth=4, random_state=42, verbose=-1
         )
@@ -142,14 +209,23 @@ class CutoffPredictor:
             df = generate_synthetic_cutoffs()
             df_lags = add_lags(df)
             df_enc = df_lags.copy()
-            df_enc["college_code_enc"] = df_enc["college_code"].map(self.college_map).fillna(0)
-            df_enc["branch_code_enc"] = df_enc["branch_code"].map(self.branch_map).fillna(0)
+            df_enc["college_code_enc"] = (
+                df_enc["college_code"].map(self.college_map).fillna(0)
+            )
+            df_enc["branch_code_enc"] = (
+                df_enc["branch_code"].map(self.branch_map).fillna(0)
+            )
             df_enc["category_enc"] = df_enc["category"].map(self.cat_map).fillna(0)
             df_enc["quota_enc"] = df_enc["quota"].map(self.quota_map).fillna(0)
             df_enc["gender_enc"] = df_enc["gender"].map(self.gender_map).fillna(0)
             features = [
-                "college_code_enc", "branch_code_enc", "category_enc", "quota_enc",
-                "gender_enc", "lag_1", "lag_2"
+                "college_code_enc",
+                "branch_code_enc",
+                "category_enc",
+                "quota_enc",
+                "gender_enc",
+                "lag_1",
+                "lag_2",
             ]
             X = df_enc[features].copy()
             X["lag_1"] = np.log1p(X["lag_1"])
@@ -161,11 +237,17 @@ class CutoffPredictor:
             pred_lgb = self.lgb_model.predict(X)
             preds = self.xgb_weight * pred_xgb + self.lgb_weight * pred_lgb
             self.residuals = y.values - preds
-            logger.info("CutoffPredictor bootstrap-fitted on synthetic data (%d rows)", len(X))
+            logger.info(
+                "CutoffPredictor bootstrap-fitted on synthetic data (%d rows)", len(X)
+            )
         except Exception as e:
-            logger.warning("CutoffPredictor bootstrap fit failed: %s — predict_one may fail", e)
+            logger.warning(
+                "CutoffPredictor bootstrap fit failed: %s — predict_one may fail", e
+            )
 
-    def train(self, df: pd.DataFrame, exam_type: str = "JEE_MAIN") -> Tuple[float, float]:
+    def train(
+        self, df: pd.DataFrame, exam_type: str = "JEE_MAIN"
+    ) -> Tuple[float, float]:
         """Train models, log to MLflow, and calculate residuals."""
         # Dynamically build mapping from dataset unique values
         for val in df["college_code"].unique():
@@ -185,7 +267,7 @@ class CutoffPredictor:
                 self.gender_map[val] = len(self.gender_map)
 
         df_lags = add_lags(df)
-        
+
         # Encode using the instance-specific mapping dictionaries
         df_enc = df_lags.copy()
         df_enc["college_code_enc"] = df_enc["college_code"].map(self.college_map)
@@ -195,8 +277,13 @@ class CutoffPredictor:
         df_enc["gender_enc"] = df_enc["gender"].map(self.gender_map)
 
         features = [
-            "college_code_enc", "branch_code_enc", "category_enc", "quota_enc",
-            "gender_enc", "lag_1", "lag_2"
+            "college_code_enc",
+            "branch_code_enc",
+            "category_enc",
+            "quota_enc",
+            "gender_enc",
+            "lag_1",
+            "lag_2",
         ]
         X = df_enc[features].copy()
         X["lag_1"] = np.log1p(X["lag_1"])
@@ -213,29 +300,40 @@ class CutoffPredictor:
         mape = float(mean_absolute_percentage_error(y_orig, p_orig))
         mae = float(mean_absolute_error(y_orig, p_orig))
         from .mlflow_tracker import log_training_run
+
         log_training_run(
             params={"xgb_weight": self.xgb_weight, "lgb_weight": self.lgb_weight},
             metrics={"train_mape": mape, "train_mae": mae},
             models={"xgb_model": self.xgb_model, "lgb_model": self.lgb_model},
-            exam_type=exam_type
+            exam_type=exam_type,
         )
         return mape, mae
 
     def predict_one(
-        self, college_code: str, branch_code: str, category: str, quota: str,
-        gender: str, lag_1: float, lag_2: float
+        self,
+        college_code: str,
+        branch_code: str,
+        category: str,
+        quota: str,
+        gender: str,
+        lag_1: float,
+        lag_2: float,
     ) -> Tuple[float, np.ndarray]:
         """Predict the closing rank and return the bootstrap distribution."""
         # Use get fallback to avoid KeyError for any unseen values
-        x_input = pd.DataFrame([{
-            "college_code_enc": self.college_map.get(college_code, 0),
-            "branch_code_enc": self.branch_map.get(branch_code, 0),
-            "category_enc": self.cat_map.get(category, 0),
-            "quota_enc": self.quota_map.get(quota, 0),
-            "gender_enc": self.gender_map.get(gender, 0),
-            "lag_1": np.log1p(lag_1),
-            "lag_2": np.log1p(lag_2)
-        }])
+        x_input = pd.DataFrame(
+            [
+                {
+                    "college_code_enc": self.college_map.get(college_code, 0),
+                    "branch_code_enc": self.branch_map.get(branch_code, 0),
+                    "category_enc": self.cat_map.get(category, 0),
+                    "quota_enc": self.quota_map.get(quota, 0),
+                    "gender_enc": self.gender_map.get(gender, 0),
+                    "lag_1": np.log1p(lag_1),
+                    "lag_2": np.log1p(lag_2),
+                }
+            ]
+        )
         p_xgb = self.xgb_model.predict(x_input)[0]
         p_lgb = self.lgb_model.predict(x_input)[0]
         pred_point = self.xgb_weight * p_xgb + self.lgb_weight * p_lgb
@@ -262,7 +360,7 @@ class EnsembleModel(mlflow.pyfunc.PythonModel):
         cat_map: Dict[str, int] = None,
         quota_map: Dict[str, int] = None,
         gender_map: Dict[str, int] = None,
-        residuals: np.ndarray = None
+        residuals: np.ndarray = None,
     ) -> None:
         self.xgb_model = xgb_model
         self.lgb_model = lgb_model
@@ -286,25 +384,35 @@ class EnsembleModel(mlflow.pyfunc.PythonModel):
                 str(row["quota"]),
                 str(row["gender"]),
                 float(row["lag_1"]),
-                float(row["lag_2"])
+                float(row["lag_2"]),
             )
             preds.append(pred_point)
         return pd.DataFrame({"predicted_closing_rank": preds})
 
     def predict_one(
-        self, college_code: str, branch_code: str, category: str, quota: str,
-        gender: str, lag_1: float, lag_2: float
+        self,
+        college_code: str,
+        branch_code: str,
+        category: str,
+        quota: str,
+        gender: str,
+        lag_1: float,
+        lag_2: float,
     ) -> Tuple[float, np.ndarray]:
         """Predict the closing rank and return the bootstrap distribution."""
-        x_input = pd.DataFrame([{
-            "college_code_enc": self.college_map.get(college_code, 0),
-            "branch_code_enc": self.branch_map.get(branch_code, 0),
-            "category_enc": self.cat_map.get(category, 0),
-            "quota_enc": self.quota_map.get(quota, 0),
-            "gender_enc": self.gender_map.get(gender, 0),
-            "lag_1": np.log1p(lag_1),
-            "lag_2": np.log1p(lag_2)
-        }])
+        x_input = pd.DataFrame(
+            [
+                {
+                    "college_code_enc": self.college_map.get(college_code, 0),
+                    "branch_code_enc": self.branch_map.get(branch_code, 0),
+                    "category_enc": self.cat_map.get(category, 0),
+                    "quota_enc": self.quota_map.get(quota, 0),
+                    "gender_enc": self.gender_map.get(gender, 0),
+                    "lag_1": np.log1p(lag_1),
+                    "lag_2": np.log1p(lag_2),
+                }
+            ]
+        )
         p_xgb = self.xgb_model.predict(x_input)[0]
         p_lgb = self.lgb_model.predict(x_input)[0]
         pred_point = self.xgb_weight * p_xgb + self.lgb_weight * p_lgb
@@ -315,5 +423,3 @@ class EnsembleModel(mlflow.pyfunc.PythonModel):
             res = np.random.choice(self.residuals, size=1000, replace=True)
         bootstrap_preds = np.clip(np.expm1(pred_point + res), 1, None)
         return float(np.expm1(pred_point)), bootstrap_preds
-
-

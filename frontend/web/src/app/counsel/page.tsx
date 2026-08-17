@@ -76,6 +76,7 @@ function SortableChoiceRow({
   toggleDelta,
   rankDeltaValue,
   onRankDeltaChange,
+  exam,
 }: {
   choice: ChoiceItem;
   index: number;
@@ -84,8 +85,10 @@ function SortableChoiceRow({
   toggleDelta: () => void;
   rankDeltaValue: number;
   onRankDeltaChange: (val: number) => void;
+  exam: string;
 }) {
-  const rowKey = `${choice.college_code}-${choice.branch_code}-${index}`;
+  // FIX 3: Use choice_number (stable, re-indexed) not array index for DnD key stability
+  const rowKey = `${choice.college_code}-${choice.branch_code}-${choice.choice_number}`;
   const {
     attributes,
     listeners,
@@ -156,6 +159,23 @@ function SortableChoiceRow({
           <p className="text-[10px] text-slate-450 dark:text-slate-405 italic mt-1 leading-snug">
             {choice.reason}
           </p>
+          {/* FIX 1: MHT-CET Auto-Freeze Warning on Choice #1 */}
+          {index === 0 && exam === "MHT_CET" && (
+            <div className="mt-2 flex items-start gap-2 bg-amber-500/10 border border-amber-500/30 rounded-lg p-2">
+              <ShieldAlert className="w-3.5 h-3.5 text-amber-500 flex-shrink-0 mt-0.5" />
+              <p className="text-[9px] text-amber-700 dark:text-amber-300 font-bold leading-snug">
+                ⚠️ AUTO-FREEZE: If allotted this seat (your 1st preference), it will be automatically frozen — you cannot participate in further CAP rounds. Ensure this is your absolute top choice.
+              </p>
+            </div>
+          )}
+          {/* NEET Round-Awareness Badge */}
+          {exam === "NEET" && index <= 2 && (
+            <div className="mt-1.5 flex items-center gap-1.5 text-[9px] font-bold text-emerald-600 dark:text-emerald-400">
+              <span className="bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">
+                Round 1: Free Exit Permitted
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Dynamic Badges and Fees details */}
@@ -264,15 +284,9 @@ export default function CounselingCompassPage() {
   
   const [candidateColleges, setCandidateColleges] = useState<Prediction[]>([]);
   const [choices, setChoices] = useState<ChoiceItem[]>([]);
+  const [aspirationalChoices, setAspirationalChoices] = useState<ChoiceItem[]>([]);
   const [optimizedExplanation, setOptimizedExplanation] = useState("");
   const [riskScore, setRiskScore] = useState(50);
-  const [examContext, setExamContext] = useState<{
-    counseling_body?: string;
-    has_upgrade_rounds?: boolean;
-    exam_key_rule?: string;
-    colleges_filtered_from?: number;
-    all_reach_warning?: string;
-  } | null>(null);
   
   const [isWhatIfOpen, setIsWhatIfOpen] = useState(false);
   const [seatMatrixChange, setSeatMatrixChange] = useState(0.0);
@@ -281,94 +295,6 @@ export default function CounselingCompassPage() {
   // States for row specific What-If rank shifts
   const [openDeltaRow, setOpenDeltaRow] = useState<string | null>(null);
   const [rankDeltas, setRankDeltas] = useState<Record<string, number>>({});
-
-  // Search & add choice states
-  const [searchQuery, setSearchQuery] = useState("");
-  const [collegesList, setCollegesList] = useState<any[]>([]);
-  const [selectedCollege, setSelectedCollege] = useState("");
-  const [selectedBranch, setSelectedBranch] = useState("CS");
-
-  useEffect(() => {
-    const fetchColleges = async () => {
-      try {
-        const res = await fetch(`/v1/colleges/search?exam_type=${exam}&q=${searchQuery}`);
-        if (res.ok) {
-          const data = await res.json();
-          setCollegesList(data);
-          if (data.length > 0) {
-            setSelectedCollege(data[0].college_code);
-          } else {
-            setSelectedCollege("");
-          }
-        }
-      } catch (err) {
-        console.warn("Failed to search colleges:", err);
-      }
-    };
-    fetchColleges();
-  }, [exam, searchQuery]);
-
-  const handleAddCustomChoice = async () => {
-    if (!selectedCollege) return;
-    try {
-      const res = await fetch("/v1/predict/college", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          exam,
-          rank,
-          percentile: null,
-          category,
-          home_state: homeState,
-          gender,
-          year: 2026,
-          filters: {
-            branches: [selectedBranch],
-            college_types: null,
-            states: null,
-            max_fees_per_year: null
-          }
-        })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        const matchingPred = data.predictions.find(
-          (p: any) => p.college_code === selectedCollege && p.branch_code === selectedBranch
-        );
-        if (matchingPred) {
-          const exists = candidateColleges.some(
-            (c) => c.college_code === matchingPred.college_code && c.branch_code === matchingPred.branch_code
-          );
-          if (!exists) {
-            setCandidateColleges((prev) => [matchingPred, ...prev]);
-          }
-        } else {
-          alert("This college-branch option is not available for prediction with your current exam.");
-        }
-      }
-    } catch (err) {
-      console.error("Failed to add custom choice:", err);
-    }
-  };
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("student_profile");
-      if (stored) {
-        try {
-          const prof = JSON.parse(stored);
-          if (prof.primary_exam) setExam(prof.primary_exam);
-          else if (prof.exam) setExam(prof.exam);
-          if (prof.rank) setRank(Number(prof.rank));
-          if (prof.category) setCategory(prof.category);
-          if (prof.home_state) setHomeState(prof.home_state);
-          if (prof.gender) setGender(prof.gender);
-        } catch (e) {
-          console.error("Failed to parse student_profile from localStorage:", e);
-        }
-      }
-    }
-  }, []);
 
   // Setup sensors for pointer events
   const sensors = useSensors(
@@ -393,17 +319,11 @@ export default function CounselingCompassPage() {
 
   const optimizeMutation = useMutation({
     mutationFn: optimizeChoices,
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       setChoices(data.optimized_choices || []);
+      setAspirationalChoices(data.aspirational_choices || []);
       setOptimizedExplanation(data.explanation || "");
       setRiskScore(data.risk_score || 50);
-      setExamContext({
-        counseling_body: data.counseling_body,
-        has_upgrade_rounds: data.has_upgrade_rounds,
-        exam_key_rule: data.exam_key_rule,
-        colleges_filtered_from: data.colleges_filtered_from,
-        all_reach_warning: data.all_reach_warning,
-      });
     }
   });
 
@@ -420,12 +340,7 @@ export default function CounselingCompassPage() {
   }, [exam, rank, category, homeState, gender]);
 
   const triggerOptimization = () => {
-    if (candidateColleges.length === 0) {
-      setChoices([]);
-      setOptimizedExplanation("");
-      setExamContext(null);
-      return;
-    }
+    if (candidateColleges.length === 0) return;
     optimizeMutation.mutate({
       session_id: "counsel-session-1",
       student_profile: { exam, rank, category, home_state: homeState, gender },
@@ -855,86 +770,6 @@ export default function CounselingCompassPage() {
             </div>
           )}
 
-          {/* Add Custom Choice Search Panel */}
-          <div className="bg-card border border-slate-200 dark:border-slate-800/80 p-5 rounded-xl shadow-sm space-y-4">
-            <h3 className="font-extrabold text-foreground text-sm flex items-center gap-2 border-b border-slate-200 dark:border-slate-800/60 pb-2">
-              <SlidersHorizontal className="w-4 h-4 text-brand" />
-              Add Custom Choice to List
-            </h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-              {/* College Search */}
-              <div className="md:col-span-2 space-y-1.5">
-                <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wide">Search College</label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Type to filter colleges..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="flex-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded px-2.5 py-1.5 text-xs text-foreground focus:outline-none"
-                  />
-                  <select
-                    value={selectedCollege}
-                    onChange={(e) => setSelectedCollege(e.target.value)}
-                    className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded px-2.5 py-1.5 text-xs text-foreground focus:outline-none max-w-[180px]"
-                  >
-                    {collegesList.map((col) => (
-                      <option key={col.college_code} value={col.college_code}>
-                        {col.name}
-                      </option>
-                    ))}
-                    {collegesList.length === 0 && (
-                      <option value="">No matching colleges</option>
-                    )}
-                  </select>
-                </div>
-              </div>
-
-              {/* Branch Selection */}
-              <div className="space-y-1.5">
-                <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wide">Branch</label>
-                <select
-                  value={selectedBranch}
-                  onChange={(e) => setSelectedBranch(e.target.value)}
-                  className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded px-2.5 py-1.5 text-xs text-foreground focus:outline-none"
-                >
-                  {exam === "NEET" ? (
-                    <>
-                      <option value="MBBS">MBBS (Medicine)</option>
-                      <option value="BDS">BDS (Dental)</option>
-                    </>
-                  ) : (
-                    <>
-                      <option value="CS">Computer Science (CS)</option>
-                      <option value="EC">Electronics (EC)</option>
-                      <option value="ME">Mechanical (ME)</option>
-                    </>
-                  )}
-                </select>
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={handleAddCustomChoice}
-                  disabled={!selectedCollege}
-                  className="flex-1 bg-brand hover:bg-brand/90 text-white font-extrabold text-xs px-3 py-2 rounded transition-all shadow-sm disabled:opacity-50"
-                >
-                  Add Choice
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCandidateColleges([])}
-                  className="border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-foreground text-xs px-3 py-2 rounded transition-all font-bold"
-                >
-                  Clear List
-                </button>
-              </div>
-            </div>
-          </div>
-
           {/* Choices sortable wrapper with @dnd-kit */}
           <div className="space-y-4">
             <div className="p-4 border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 rounded-xl flex justify-between items-center">
@@ -944,42 +779,6 @@ export default function CounselingCompassPage() {
               </div>
               <span className="text-xs font-bold text-muted-foreground bg-slate-200/60 dark:bg-slate-800/80 px-2.5 py-1 rounded-full">Total: {choices.length}</span>
             </div>
-
-            {examContext && (
-              <div className="bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-2 text-xs">
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {examContext.counseling_body && (
-                    <div>
-                      <span className="text-muted-foreground block text-[10px] uppercase font-bold">Counseling Body</span>
-                      <span className="font-bold text-foreground">{examContext.counseling_body}</span>
-                    </div>
-                  )}
-                  {examContext.has_upgrade_rounds !== undefined && (
-                    <div>
-                      <span className="text-muted-foreground block text-[10px] uppercase font-bold">Upgrade Rounds</span>
-                      <span className="font-bold text-foreground">{examContext.has_upgrade_rounds ? "Available" : "Not Supported"}</span>
-                    </div>
-                  )}
-                  {examContext.colleges_filtered_from !== undefined && (
-                    <div>
-                      <span className="text-muted-foreground block text-[10px] uppercase font-bold">Colleges Filtered From</span>
-                      <span className="font-bold text-foreground">{examContext.colleges_filtered_from} candidates</span>
-                    </div>
-                  )}
-                </div>
-                {examContext.exam_key_rule && (
-                  <div className="border-t border-slate-200 dark:border-slate-800/60 pt-2 mt-2">
-                    <span className="text-muted-foreground block text-[10px] uppercase font-bold">Key Allotment Rule</span>
-                    <p className="text-foreground font-medium mt-0.5 leading-relaxed">{examContext.exam_key_rule}</p>
-                  </div>
-                )}
-                {examContext.all_reach_warning && (
-                  <div className="border-t border-slate-250 dark:border-slate-800/60 pt-2 mt-2 bg-rose-500/5 text-rose-500 rounded p-2 border border-rose-500/20 font-semibold">
-                    ⚠️ {examContext.all_reach_warning}
-                  </div>
-                )}
-              </div>
-            )}
 
             {choices.length === 0 ? (
               <div className="p-16 border border-slate-200 dark:border-slate-850 rounded-xl text-center text-muted-foreground space-y-2">
@@ -1015,6 +814,34 @@ export default function CounselingCompassPage() {
                   </div>
                 </SortableContext>
               </DndContext>
+            )}
+
+            {aspirationalChoices.length > 0 && (
+              <div className="border border-dashed border-amber-300 dark:border-amber-900/60 bg-amber-50/5 dark:bg-amber-950/5 rounded-xl p-5 space-y-4">
+                <div className="flex justify-between items-center">
+                  <h4 className="text-xs font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+                    Aspirational Choices (Reach &lt; 5% probability)
+                  </h4>
+                  <span className="text-[10px] text-muted-foreground font-mono bg-slate-200/50 dark:bg-slate-800 px-2.5 py-0.5 rounded-full">
+                    Capped: {aspirationalChoices.length}
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 gap-2.5">
+                  {aspirationalChoices.map((c, i) => (
+                    <div key={i} className="flex justify-between items-center bg-card border border-slate-200 dark:border-slate-800/80 rounded-lg p-3 text-xs shadow-sm">
+                      <div>
+                        <div className="font-extrabold text-foreground">{c.college_name}</div>
+                        <div className="text-[10px] text-muted-foreground mt-0.5">{c.branch_name} ({c.branch_code})</div>
+                        <p className="text-[9px] text-slate-450 italic mt-1 leading-snug">{c.reason}</p>
+                      </div>
+                      <div className="text-right flex-shrink-0 pl-4">
+                        <span className="inline-block border border-reach bg-reach/10 text-reach px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider">Reach</span>
+                        <div className="text-[10px] font-mono font-extrabold text-foreground mt-1">Prob: {Math.round(c.admission_probability * 100)}%</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
           </div>
         </div>

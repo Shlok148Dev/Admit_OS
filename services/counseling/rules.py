@@ -1,6 +1,7 @@
 """
 JoSAA Rules database and Q&A engine for official counseling rules.
 """
+
 from typing import Dict, List, Tuple
 
 JOSAA_RULES: List[Dict[str, str]] = [
@@ -63,19 +64,20 @@ JOSAA_RULES: List[Dict[str, str]] = [
         "title": "Category Upgradation Business Rules",
         "rule": "If a category student (SC/ST/OBC/EWS) qualifies under the open merit rank in a later round, they are upgraded to a GENERAL seat, and their category seat is freed.",
         "source": "JoSAA Business Rules 2025, Section 28",
-    }
+    },
 ]
+
 
 def search_rules(query: str) -> List[Dict[str, str]]:
     """Search for relevant rules based on keywords in the query."""
     keywords = query.lower().split()
     matched: List[Tuple[float, Dict[str, str]]] = []
-    
+
     for r in JOSAA_RULES:
         score = 0.0
         title_lower = r["title"].lower()
         rule_lower = r["rule"].lower()
-        
+
         for kw in keywords:
             if len(kw) < 3:
                 continue
@@ -83,12 +85,13 @@ def search_rules(query: str) -> List[Dict[str, str]]:
                 score += 2.0
             if kw in rule_lower:
                 score += 1.0
-                
+
         if score > 0.0:
             matched.append((score, r))
-            
+
     matched.sort(key=lambda x: x[0], reverse=True)
     return [item[1] for item in matched]
+
 
 def format_chat_response(query: str) -> Tuple[str, str, List[str]]:
     """Generate answer, confidence, and sources for the chat query."""
@@ -97,17 +100,21 @@ def format_chat_response(query: str) -> Tuple[str, str, List[str]]:
         return (
             "I couldn't find a specific official JoSAA rule matching your query. Please refer to the official JoSAA business rules brochure at https://josaa.nic.in.",
             "LOW",
-            ["Official JoSAA Portal"]
+            ["Official JoSAA Portal"],
         )
-        
+
     best_match = matched[0]
-    confidence = "HIGH" if len(matched) > 0 and best_match["title"].lower() in query.lower() else "MEDIUM"
-    
+    confidence = (
+        "HIGH"
+        if len(matched) > 0 and best_match["title"].lower() in query.lower()
+        else "MEDIUM"
+    )
+
     # Format answer text
     answer = f"According to JoSAA rules regarding **{best_match['title']}**:\n\n{best_match['rule']}"
     if len(matched) > 1:
         other_rules = ", ".join([f"'{m['title']}'" for m in matched[1:3]])
         answer += f"\n\nRelated rule(s) you might find useful: {other_rules}."
-        
+
     sources = [m["source"] for m in matched[:2]]
     return answer, confidence, sources

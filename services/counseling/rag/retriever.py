@@ -62,6 +62,7 @@ class CounselingRetriever:
         else:
             logger.warning("No FAISS index found — running live ingest")
             from .ingest import KnowledgeBaseIngestor
+
             ingestor = KnowledgeBaseIngestor()
             self.chunks = ingestor.run()
         self._embedder = _load_embedder()
@@ -75,9 +76,7 @@ class CounselingRetriever:
         val = emb[0]
         return val.tolist() if hasattr(val, "tolist") else list(val)
 
-    def _score_chunk(
-        self, chunk: Chunk, query_emb: List[float], query: str
-    ) -> float:
+    def _score_chunk(self, chunk: Chunk, query_emb: List[float], query: str) -> float:
         """Compute final score: cosine + keyword boost + recency weight."""
         cosine = _cosine_similarity(query_emb, chunk.embedding)
         boost = _keyword_boost(query, chunk.text)
@@ -85,17 +84,40 @@ class CounselingRetriever:
         return (cosine + boost) * recency
 
     def retrieve(
-        self, query: str, top_k: int = 5, min_score: float = 0.0, exam_type: Optional[str] = None
+        self,
+        query: str,
+        top_k: int = 5,
+        min_score: float = 0.0,
+        exam_type: Optional[str] = None,
     ) -> List[Tuple[Chunk, float]]:
-        """Retrieve top-k chunks by hybrid score, filtered by min_score."""
+        """Retrieve top-k chunks by hybrid score, filtered by min_score and quality rules."""
         self._ensure_loaded()
         query_emb = self._embed_query(query)
         scored = []
+        q_lower = query.lower()
+
+        # Specific procedural keywords to boost relevant rule chunks
+        procedural_keywords = ["float", "freeze", "slide", "deposit", "refund", "mop-up", "mop up", "stray", "round 2", "round 3", "upgrade", "cancel"]
+        has_procedural = any(kw in q_lower for kw in procedural_keywords)
+
         for chunk in self.chunks:
+            # Filter out unhelpful generic PDF introductory headers
+            text_lower = chunk.text.lower()
+            if "section 1: introduction and general overview" in text_lower or "table of contents" in text_lower:
+                continue
+
             score = self._score_chunk(chunk, query_emb, query)
+
+            # Boost chunk if query asks about procedural rules and chunk contains matching procedural keywords
+            if has_procedural:
+                matches = sum(1 for kw in procedural_keywords if kw in q_lower and kw in text_lower)
+                if matches > 0:
+                    score += 0.25 * matches
+
             if exam_type and _should_boost_exam(chunk.source, exam_type):
                 score += 0.20
             scored.append((chunk, score))
+
         scored.sort(key=lambda x: x[1], reverse=True)
         return [(c, s) for c, s in scored[:top_k] if s >= min_score]
 
@@ -106,8 +128,9 @@ class CounselingRetriever:
         top_score = retrieved_chunks[0][1]
         try:
             from sentence_transformers import SentenceTransformer
+
             is_embedder_available = True
-        except ImportError:
+        except Exception:
             is_embedder_available = False
 
         if is_embedder_available:

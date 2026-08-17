@@ -1,23 +1,19 @@
-FROM python:3.11-slim
-
+# Multi-stage production Dockerfile for Prediction Service
+FROM python:3.11-slim as builder
 WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends gcc libpq-dev && rm -rf /var/lib/apt/lists/*
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+COPY pyproject.toml .
+RUN pip install --no-cache-dir fastapi uvicorn[standard] psycopg2-binary pydantic pydantic-settings numpy scikit-learn
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    libpq-dev \
-    libgomp1 \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy and install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy application code
-COPY . /app/services/prediction
-
-EXPOSE 8000
-
+FROM python:3.11-slim as runner
+WORKDIR /app
+RUN groupadd -g 10001 appgroup && useradd -u 10001 -g appgroup -s /bin/sh appuser
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 ENV PYTHONPATH=/app
-# Start FastAPI application
-CMD ["uvicorn", "services.prediction.main:app", "--host", "0.0.0.0", "--port", "8000"]
+COPY services/prediction /app/services/prediction
+USER appuser
+EXPOSE 8001
+CMD ["uvicorn", "services.prediction.main:app", "--host", "0.0.0.0", "--port", "8001"]

@@ -7,7 +7,6 @@ and saves a FAISS index for retrieval.
 from __future__ import annotations
 
 import logging
-import os
 import pickle
 import re
 from dataclasses import dataclass, field
@@ -65,14 +64,28 @@ def _split_into_chunks(text: str, source: str) -> List[Chunk]:
     return chunks
 
 
+_CACHED_EMBEDDER = None
+
+
 def _load_embedder():  # type: ignore[return]
-    """Load sentence-transformers model (all-MiniLM-L6-v2)."""
+    """Load sentence-transformers model (all-MiniLM-L6-v2) with singleton caching."""
+    global _CACHED_EMBEDDER
+    if _CACHED_EMBEDDER is not None:
+        return _CACHED_EMBEDDER
     try:
         from sentence_transformers import SentenceTransformer  # type: ignore[import]
-        return SentenceTransformer("all-MiniLM-L6-v2")
-    except Exception as e:
-        logger.warning(f"sentence-transformers unavailable: {e}")
-        return None
+
+        _CACHED_EMBEDDER = SentenceTransformer("all-MiniLM-L6-v2", local_files_only=True)
+        return _CACHED_EMBEDDER
+    except Exception:
+        try:
+            from sentence_transformers import SentenceTransformer  # type: ignore[import]
+
+            _CACHED_EMBEDDER = SentenceTransformer("all-MiniLM-L6-v2")
+            return _CACHED_EMBEDDER
+        except Exception as e:
+            logger.warning(f"sentence-transformers unavailable: {e}")
+            return None
 
 
 class KnowledgeBaseIngestor:

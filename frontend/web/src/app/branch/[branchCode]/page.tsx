@@ -31,9 +31,24 @@ export default function BranchDetailPage({ params }: BranchDetailPageProps) {
   const { data: stats, isLoading, error } = useQuery<BranchStats>({
     queryKey: ["branch-details", branchCode],
     queryFn: () => getBranchStats(branchCode),
+    retry: false,
   });
 
-  const activeStats = stats || BRANCH_STATS_MOCK[branchCode] || BRANCH_STATS_MOCK["CS"];
+  if (error) {
+    return (
+      <div className="p-8 text-center max-w-xl mx-auto my-12 bg-red-50 border border-red-200 rounded-2xl space-y-4">
+        <h2 className="text-lg font-bold text-red-800">Career Statistics Offline</h2>
+        <p className="text-sm text-red-600">Detailed placement and salary statistics are currently unavailable. Please verify with official NIRF disclosures.</p>
+        <Link href="/branch" className="inline-block text-xs bg-red-800 text-white font-bold px-4 py-2 rounded-xl">Back to List</Link>
+      </div>
+    );
+  }
+
+  if (isLoading || !stats) {
+    return <div className="p-8 text-center text-slate-500 font-bold">Loading stats...</div>;
+  }
+
+  const activeStats = stats;
 
   // Salary projections by experience levels (Entry, Mid, Senior)
   const salaryLevels = [

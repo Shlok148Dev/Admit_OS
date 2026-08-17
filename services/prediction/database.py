@@ -7,8 +7,17 @@ import logging
 from datetime import datetime
 from typing import Generator
 from sqlalchemy import (
-    create_engine, Column, Integer, String, SmallInteger, Boolean, Text, DateTime,
-    UniqueConstraint, CheckConstraint, Float
+    create_engine,
+    Column,
+    Integer,
+    String,
+    SmallInteger,
+    Boolean,
+    Text,
+    DateTime,
+    UniqueConstraint,
+    CheckConstraint,
+    Float,
 )
 from sqlalchemy.orm import declarative_base, sessionmaker, Session
 
@@ -17,10 +26,12 @@ logger: logging.Logger = logging.getLogger("prediction_service.database")
 
 Base = declarative_base()
 
+
 class College(Base):
     """College master table model."""
+
     __tablename__ = "colleges"
-    
+
     college_code = Column(String(20), primary_key=True)
     name = Column(String(200), nullable=False)
     type = Column(String(10), nullable=False)
@@ -39,14 +50,47 @@ class College(Base):
     __table_args__ = (
         CheckConstraint(
             "type IN ('IIT', 'NIT', 'IIIT', 'GFTI', 'DEEMED', 'STATE', 'PRIVATE')",
-            name="valid_type"
+            name="valid_type",
         ),
     )
 
+    @property
+    def governing_body(self) -> str:
+        """Determine the governing body for this college."""
+        mapping = {
+            "IIT_BOMBAY": "JOSAA",
+            "IIT_DELHI": "JOSAA",
+            "IIT_MADRAS": "JOSAA",
+            "NIT_TRICHY": "JOSAA",
+            "NIT_SURATHKAL": "JOSAA",
+            "IIIT_ALLAHABAD": "JOSAA",
+            "IIIT_DELHI": "JAC_DELHI",
+            "COEP_PUNE": "DTE-state",
+            "VJTI_MUMBAI": "DTE-state",
+            "ICT_MUMBAI": "DTE-state",
+        }
+        # Explicit mapped value
+        code = self.college_code.upper()
+        if code in mapping:
+            return mapping[code]
+        # Confident fallbacks based on type
+        t = self.type.upper()
+        if t == "IIT":
+            return "JOSAA"
+        elif t in ("NIT", "IIIT", "GFTI"):
+            return "JOSAA"
+        elif t in ("STATE", "PRIVATE"):
+            return "DTE-state"
+        elif t in ("AIIMS", "DEEMED"):
+            return "MCC"
+        return "JOSAA"
+
+
 class ExamCutoff(Base):
     """Exam cutoff table model."""
+
     __tablename__ = "exam_cutoffs"
-    
+
     id = Column(Integer, primary_key=True, autoincrement=True)
     exam_type = Column(String(20), nullable=False)
     counseling_body = Column(String(20), nullable=False)
@@ -66,24 +110,33 @@ class ExamCutoff(Base):
     sme_verified = Column(Boolean, default=False)
     sme_reviewer_id = Column(Integer, nullable=True)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
-    updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = Column(
+        DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow
+    )
 
     __table_args__ = (
         UniqueConstraint(
-            "exam_type", "counseling_body", "year", "round_number",
-            "college_code", "branch_code", "category", "quota",
-            name="uq_exam_cutoffs_combo"
+            "exam_type",
+            "counseling_body",
+            "year",
+            "round_number",
+            "college_code",
+            "branch_code",
+            "category",
+            "quota",
+            name="uq_exam_cutoffs_combo",
         ),
         CheckConstraint(
-            "data_confidence IN ('HIGH', 'MEDIUM', 'LOW')",
-            name="chk_data_confidence"
+            "data_confidence IN ('HIGH', 'MEDIUM', 'LOW')", name="chk_data_confidence"
         ),
     )
 
+
 class SMEReviewQueue(Base):
     """SME Review Queue table model for low-confidence or anomalous cutoffs."""
+
     __tablename__ = "sme_review_queue"
-    
+
     id = Column(Integer, primary_key=True, autoincrement=True)
     exam_type = Column(String(20), nullable=False)
     counseling_body = Column(String(20), nullable=False)
@@ -102,7 +155,9 @@ class SMEReviewQueue(Base):
     resolved = Column(Boolean, default=False)
     reviewer_id = Column(Integer, nullable=True)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
-    updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = Column(
+        DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow
+    )
 
 
 class PredictionLog(Base):
@@ -127,6 +182,7 @@ class PredictionLog(Base):
 
 class Guide(Base):
     """Guide table model for SEO and informational articles."""
+
     __tablename__ = "guides"
 
     slug = Column(String(50), primary_key=True)
@@ -135,8 +191,9 @@ class Guide(Base):
     description = Column(String(200), nullable=True)
     category = Column(String(50), nullable=True)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
-    updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
-
+    updated_at = Column(
+        DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow
+    )
 
 
 # Engine setup
@@ -144,13 +201,15 @@ DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./admitos_prediction.db
 connect_args = {}
 engine_args = {}
 if DATABASE_URL.startswith("postgresql"):
-    DATABASE_URL = DATABASE_URL.replace("?prepared_statement_cache_size=0", "").replace("&prepared_statement_cache_size=0", "")
+    DATABASE_URL = DATABASE_URL.replace("?prepared_statement_cache_size=0", "").replace(
+        "&prepared_statement_cache_size=0", ""
+    )
     engine_args = {
         "pool_size": 20,
         "max_overflow": 40,
         "pool_timeout": 30,
         "pool_recycle": 3600,
-        "pool_pre_ping": True
+        "pool_pre_ping": True,
     }
 elif DATABASE_URL.startswith("sqlite"):
     connect_args = {"check_same_thread": False}
@@ -165,6 +224,7 @@ except Exception as e:
     logger.error(f"Failed to create database engine: {e}", exc_info=True)
     raise
 
+
 def init_db() -> None:
     """Initialize database and create tables if they do not exist."""
     try:
@@ -173,6 +233,7 @@ def init_db() -> None:
     except Exception as e:
         logger.error(f"Failed to initialize database: {e}", exc_info=True)
         raise
+
 
 def get_db() -> Generator[Session, None, None]:
     """Dependency injection to get database session."""

@@ -13,6 +13,7 @@ from typing import Any
 try:
     from airflow import DAG  # type: ignore[import]
     from airflow.operators.python import PythonOperator
+
     AIRFLOW_AVAILABLE = True
 except ImportError:
     AIRFLOW_AVAILABLE = False
@@ -38,8 +39,6 @@ DEFAULT_ARGS = {
 
 def task_fetch_neet_pdfs(**context: Any) -> str:
     """Task 1: Download NEET cutoff PDFs from MCC portal."""
-    import tempfile
-    import os
     import httpx
 
     out_dir = os.path.join("/tmp", "neet_pdfs")
@@ -49,7 +48,9 @@ def task_fetch_neet_pdfs(**context: Any) -> str:
         try:
             with httpx.Client(timeout=30.0, follow_redirects=True) as client:
                 resp = client.get(url)
-                if resp.status_code == 200 and "pdf" in resp.headers.get("content-type", ""):
+                if resp.status_code == 200 and "pdf" in resp.headers.get(
+                    "content-type", ""
+                ):
                     fname = os.path.join(out_dir, os.path.basename(url) + ".pdf")
                     with open(fname, "wb") as f:
                         f.write(resp.content)
@@ -141,12 +142,16 @@ def task_load_to_db(**context: Any) -> None:
 def task_publish_kafka(**context: Any) -> None:
     """Task 5: Publish ValidatedGroundTruth event to Kafka."""
     from services.data.crawler.web_crawler import WebCrawlerAgent
+
     agent = WebCrawlerAgent("neet-dag-publisher")
-    agent.publish_to_kafka("data.validated.ground_truth", {
-        "exam_type": "NEET",
-        "timestamp": datetime.utcnow().isoformat() + "Z",
-        "status": "completed",
-    })
+    agent.publish_to_kafka(
+        "data.validated.ground_truth",
+        {
+            "exam_type": "NEET",
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "status": "completed",
+        },
+    )
 
 
 if AIRFLOW_AVAILABLE:
@@ -160,10 +165,18 @@ if AIRFLOW_AVAILABLE:
         tags=["neet", "ingestion", "cutoff"],
     ) as dag:
 
-        fetch = PythonOperator(task_id="fetch_neet_pdfs", python_callable=task_fetch_neet_pdfs)
-        extract = PythonOperator(task_id="extract_tables", python_callable=task_extract_tables)
-        validate = PythonOperator(task_id="validate_records", python_callable=task_validate_records)
+        fetch = PythonOperator(
+            task_id="fetch_neet_pdfs", python_callable=task_fetch_neet_pdfs
+        )
+        extract = PythonOperator(
+            task_id="extract_tables", python_callable=task_extract_tables
+        )
+        validate = PythonOperator(
+            task_id="validate_records", python_callable=task_validate_records
+        )
         load = PythonOperator(task_id="load_to_db", python_callable=task_load_to_db)
-        publish = PythonOperator(task_id="publish_kafka", python_callable=task_publish_kafka)
+        publish = PythonOperator(
+            task_id="publish_kafka", python_callable=task_publish_kafka
+        )
 
         fetch >> extract >> validate >> load >> publish

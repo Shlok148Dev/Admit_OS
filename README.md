@@ -56,25 +56,25 @@ Admit OS is built as an enterprise-grade, event-driven microservices ecosystem d
 
 ```mermaid
 graph TD
-    Client[Web Client (Next.js 14) / Mobile Client (Expo)] --> Gateway[API Gateway / Reverse Proxy]
+    Client["Web Client (Next.js 14) / Mobile Client (Expo)"] --> Gateway["API Gateway / Reverse Proxy"]
     
     subgraph "Microservices Ecosystem"
-        Gateway --> CounselingSvc[Counseling Service (FastAPI + ARIA RAG)]
-        Gateway --> PredictionSvc[Prediction Engine (Cutoff ML + Calibration)]
-        Gateway --> AuthSvc[Auth Service (JWT + RBAC)]
-        Gateway --> AnalyticsSvc[Analytics & Outcome Service]
-        Gateway --> UserSvc[User & Profile State Service]
-        Gateway --> CareerSvc[Career & Branch Graph Service]
-        Gateway --> NotificationSvc[Notification Service (FCM + WebPush)]
+        Gateway --> CounselingSvc["Counseling Service (FastAPI + ARIA RAG)"]
+        Gateway --> PredictionSvc["Prediction Engine (Cutoff ML + Calibration)"]
+        Gateway --> AuthSvc["Auth Service (JWT + RBAC)"]
+        Gateway --> AnalyticsSvc["Analytics & Outcome Service"]
+        Gateway --> UserSvc["User & Profile State Service"]
+        Gateway --> CareerSvc["Career & Branch Graph Service"]
+        Gateway --> NotificationSvc["Notification Service (FCM + WebPush)"]
         
-        CounselingSvc --> DB[(PostgreSQL / SQLite Cutoffs DB)]
-        CounselingSvc --> VectorStore[(Vector Embeddings Store)]
-        CounselingSvc --> RedisCache[(Redis Distributed Cache)]
+        CounselingSvc --> DB[("PostgreSQL / SQLite Cutoffs DB")]
+        CounselingSvc --> VectorStore[("Vector Embeddings Store")]
+        CounselingSvc --> RedisCache[("Redis Distributed Cache")]
         PredictionSvc --> DB
         PredictionSvc --> RedisCache
     end
     
-    CounselingSvc --> SearchEngine[Real-Time Live Web Verification Engine]
+    CounselingSvc --> SearchEngine["Real-Time Live Web Verification Engine"]
 ```
 
 ### Microservices Port Map
@@ -220,8 +220,3 @@ We welcome contributions from the open-source community! Please read our [Contri
 
 Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for more details.
 
----
-
-<div align="center">
-  <sub>Built with ❤️ by Shlok Pandey & the Admit OS Open Source Community.</sub>
-</div>
